@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: toy_pro_user
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/dev_toy?schema=dev_toy_schema01
+    username: toy_user
+    password: toypostgres
+#    properties:
+#      serverZoneId: Asia/Seoul
+#      # Duration.parse 를 사용하므로 3s 형식으로 넣으면 예외가 발생
+#      # MySqlConnectionFactoryProvider#setup 메서드 참고
+#      connectTimeout: PT3S
+
+    # https://github.com/r2dbc/r2dbc-pool
+    # https://javadoc.io/doc/io.r2dbc/r2dbc-pool/0.9.0.M1/io/r2dbc/pool/ConnectionPoolConfiguration.Builder.html
+    # @See org.springframework.boot.autoconfigure.r2dbc.R2dbcProperties.Pool
+#    pool:
+#      initial-size: 10
+#      max-size: 10
+#      max-life-time: 30m
+#      max-create-connection-time: 3s
+  security:
+    user:
+      name: user
+      password: 1111
+      
+server:
+  error:
+    whitelabel:
+      enabled: false
+#    include-exception: true
+#    include-message: always
+#    include-binding-errors: always
+#    include-stacktrace: always
+      
+#logging:
+#  level:
+#    root:
+#      level: DEBUG
+#    org:
+#      springframework:
+#        r2dbc: DEBUG  # R2DBC 로깅
+#        security:
+#          web: DEBUG
+#    io:
+#      r2dbc:
+#        pool: DEBUG              # R2DBC Connection Pool 로깅
+#        postgresql: DEBUG        # R2DBC - PostgreSQL 드라이버 로깅
