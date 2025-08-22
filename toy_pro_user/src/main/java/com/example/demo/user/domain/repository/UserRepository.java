@@ -3,7 +3,7 @@ package com.example.demo.user.domain.repository;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
-import com.example.demo.user.api.dto.UserSearchRequestDTO;
+import com.example.demo.user.api.dto.UserSearchRequestDTO_before;
 import com.example.demo.user.domain.model.User;
 
 import reactor.core.publisher.Flux;
@@ -28,5 +28,5 @@ public interface UserRepository extends ReactiveCrudRepository<User, Long>{
 	 * @description 사용자(삭제되지 않은) 목록 조건 검색
 	 */
 	@Query("SELECT * FROM t_user_m01 WHERE del_yn = 'N' AND user_nm ILIKE CONCAT('%', :userNm, '%') LIMIT :size OFFSET :offset")
-	Flux<User> findActiveUser(String userNm, int size, int offset);
+	Flux<User> findAll(String userNm, int size, int offset);
 }

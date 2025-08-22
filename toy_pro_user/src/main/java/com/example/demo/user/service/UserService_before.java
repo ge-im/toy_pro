@@ -2,15 +2,12 @@ package com.example.demo.user.service;
 
 import org.springframework.stereotype.Service;
 
-import com.example.demo.common.dto.PageableDTO;
-import com.example.demo.common.dto.SearchDTO;
 import com.example.demo.user.api.dto.UserCreateRequestDTO;
 import com.example.demo.user.api.dto.UserResponseDTO;
-import com.example.demo.user.api.dto.UserSearchRequestDTO;
+import com.example.demo.user.api.dto.UserSearchRequestDTO_before;
 import com.example.demo.user.api.dto.UserUpdateRequestDTO;
 import com.example.demo.user.domain.mapper.UserMapper;
 import com.example.demo.user.domain.model.User;
-import com.example.demo.user.domain.repository.UserCustomRepository;
 import com.example.demo.user.domain.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -19,10 +16,10 @@ import reactor.core.publisher.Mono;
 
 /**
  * @packageName    : com.example.demo.user.domain.service
- * @fileName       : UserService.java
+ * @fileName       : UserService_before.java
  * @author         : imge
  * @date           : 2025. 8. 12. 오후 4:27:33
- * @description    : 사용자 기능의 business 레이어 -router/handler, 페이징 적용
+ * @description    : 사용자 기능의 business 레이어 - controller 사용 버전(페이징 적용 이전)
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
@@ -30,20 +27,14 @@ import reactor.core.publisher.Mono;
  */
 @Service
 @RequiredArgsConstructor
-public class UserService {
-	
+public class UserService_before {
+
 	private final UserRepository userRepository;
-	private final UserCustomRepository userCustomRepository;
 	private final UserMapper userMapper;
 	
-	public Flux<UserResponseDTO> findAll(String userNm, PageableDTO dto){
-		return userRepository.findAll(userNm, dto.getSize(), dto.getSize() * dto.getPage())
+	public Flux<UserResponseDTO> search(UserSearchRequestDTO_before dto) {
+		return userRepository.findAll(dto.userNm().get(), dto.size().get(), dto.getOffset())
 							 .map(userMapper::toResponse);
-	}
-	
-	public Flux<UserResponseDTO> findAllByConditions(SearchDTO<UserSearchRequestDTO> dto) {
-		return userCustomRepository.findAllByConditions(dto)
-								   .map(userMapper::toResponse);
 	}
 	
 	public Mono<UserResponseDTO> findById(Long userSn) {
@@ -56,7 +47,8 @@ public class UserService {
 		u.setRegDt(java.time.LocalDateTime.now());
 		u.setUpdtDt(java.time.LocalDateTime.now());
 		
-		//id 체크 한번 더 -> id가 없으면 저장, 있으면 exception 처리로 변경
+		//id 체크 한번 더
+		//id가 없으면 저장으로 변경
 		return userRepository.save(u)
 							 .map(userMapper::toResponse);
 	}

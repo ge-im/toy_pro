@@ -1,6 +1,5 @@
 package com.example.demo.user.api.controller;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -9,14 +8,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.user.api.dto.UserCreateRequestDTO;
 import com.example.demo.user.api.dto.UserResponseDTO;
-import com.example.demo.user.api.dto.UserSearchRequestDTO;
+import com.example.demo.user.api.dto.UserSearchRequestDTO_before;
 import com.example.demo.user.api.dto.UserUpdateRequestDTO;
-import com.example.demo.user.service.UserService;
+import com.example.demo.user.service.UserService_before;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,16 +34,16 @@ import reactor.core.publisher.Mono;
  * -----------------------------------------------------------
  * 2025. 8. 12.        imge       최초 생성
  */
-@RestController
-@RequestMapping("/users")
+//@RestController
+//@RequestMapping("/users")
 @RequiredArgsConstructor
 @Slf4j
 public class UserController {
 	
-	private final UserService userService;
+	private final UserService_before userService;
 	
 	@GetMapping
-	public Flux<UserResponseDTO> search(@ModelAttribute UserSearchRequestDTO dto) {
+	public Flux<UserResponseDTO> search(@ModelAttribute UserSearchRequestDTO_before dto) {
 		return userService.search(dto);
 	}
 	
