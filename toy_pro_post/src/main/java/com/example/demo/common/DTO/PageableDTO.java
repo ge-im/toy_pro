@@ -29,6 +29,10 @@ public class PageableDTO {
 		checkSize(size);
 	}
 	
+	public int getOffset() {
+		return size * page;
+	}
+	
 	private void checkPage(int page) {
 		this.page = page < 0 ? DEFAULT_PAGE : page; 
 	}
