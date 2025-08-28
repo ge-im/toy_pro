@@ -16,9 +16,10 @@ public class PostRouter {
 							.GET(handler::findAll)
 							.GET("/{postSn}", handler::findPostById)
 							.POST("/search", handler::searchPost)
+							.POST("/{postSn}/views", handler::increaseViewCount)
 							.POST(handler::create)
 							.PUT(handler::update)
-							.DELETE("postSn", handler::delete))
+							.DELETE("/{postSn}", handler::delete))
 					.build();
 	}
 }

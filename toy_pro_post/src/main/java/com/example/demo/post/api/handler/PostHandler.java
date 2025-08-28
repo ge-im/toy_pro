@@ -40,7 +40,7 @@ public class PostHandler {
 					  .flatMap(dto -> {
 						  return ServerResponse.ok()
 								  .contentType(MediaType.APPLICATION_JSON)
-								  .body(postService.findAllbyContdition(dto), PostResponseDTO.class);
+								  .body(postService.findAllByContditions(dto), PostResponseDTO.class);
 					  });
 	}
 	
@@ -48,6 +48,12 @@ public class PostHandler {
 		long postSn = Long.parseLong(request.pathVariable("postSn"));
 		return postService.findPostById(postSn)
 						  .flatMap(ServerResponse.ok()::bodyValue);
+	}
+	
+	public Mono<ServerResponse> increaseViewCount(ServerRequest request) {
+		long postSn = Long.parseLong(request.pathVariable("postSn"));
+		return postService.increaseViewCount(postSn)
+						  .then(ServerResponse.noContent().build());
 	}
 	
 	public Mono<ServerResponse> create(ServerRequest request) {

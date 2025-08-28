@@ -17,8 +17,8 @@ import lombok.Setter;
 @Setter
 @Table("t_post_m01")
 public class Post {
-	@Id 
-	private long post_sn;
+	@Id @Column("post_sn") 
+	private long postSn;
 	
 	private String title;
 	
@@ -26,6 +26,9 @@ public class Post {
 	private String userSn;
 	
 	private String content;
+	
+	@Column("view_cnt")
+	private long viewCnt;
 	
 	@Column("del_yn")
 	private String delYn; 

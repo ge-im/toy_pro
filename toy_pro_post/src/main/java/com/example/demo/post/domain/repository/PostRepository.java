@@ -18,6 +18,7 @@ public interface PostRepository extends ReactiveCrudRepository<Post, Long> {
 				, u.user_id
 				, u.user_nm
 				, p.content
+				, p.view_cnt
 				, p.del_yn
 				, p.red_dt
 				, p.updt_dt
@@ -32,4 +33,29 @@ public interface PostRepository extends ReactiveCrudRepository<Post, Long> {
 			""")
 	public Flux<Post> findAll(String title, String userNm, int size, int offset);
 	
+	@Query("""
+			SELECT
+				p.post_sn
+				, p.title
+				, p.user_sn
+				, u.user_id
+				, u.user_nm
+				, p.content
+				, p.view_cnt
+				, p.del_yn
+				, p.red_dt
+				, p.updt_dt
+			FROM t_post_m01 p INNER JOIN t_user_m01 u
+			 		ON ( p.user_sn = u.user_sn)
+			WHERE
+				p.post_sn = :postSn
+			""")
+	public Mono<Post> findPostById(long postSn);
+	
+	@Query("""
+			UPDATE t_post_m01 SET
+				view_cnt = view_cnt + 1
+			WHERE post_sn = :postSn 	
+			""")
+	public Mono<Integer> increaseViewCount(long postSn);
 }
