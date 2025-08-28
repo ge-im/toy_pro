@@ -31,14 +31,44 @@ CREATE TABLE dev_toy_schema01.t_user_auth_s01 (
 );
 
 CREATE TABLE dev_toy_schema01.t_post_m01 (
-	sn SERIAL NOT NULL PRIMARY KEY
+	post_sn SERIAL NOT NULL PRIMARY KEY
 	, title VARCHAR(255)
-	, user_id VARCHAR(20) 
+	, user_sn INTEGER  
 	, content TEXT
+	, view_cnt INTEGER 
 	, del_yn CHAR(1) 
 	, reg_dt TIMESTAMP 
 	, updt_dt TIMESTAMP 
 );
+
+CREATE TABLE dev_toy_schema01.t_comment_m01 (
+	comment_sn SERIAL NOT NULL PRIMARY KEY
+	, post_sn INTEGER
+	, user_sn INTEGER 
+	, content VARCHAR(255)
+	, parent_sn INTEGER
+	, del_yn CHAR(1) 
+	, reg_dt TIMESTAMP 
+	, updt_dt TIMESTAMP 
+);
+
+CREATE TABLE dev_toy_schema01.t_like_m01 (
+	sn SERIAL NOT NULL PRIMARY KEY
+	, target_type CHAR(1) --P:(POST), C(COMMENT)
+	, target_sn INTEGER --POST_SN, COMMENT_SN
+	, user_sn INTEGER
+	, reg_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
+);
+
+CREATE TABLE dev_toy_schema01.t_like_h01 (
+	sn SERIAL NOT NULL PRIMARY KEY
+	, target_type CHAR(1) --P:(POST), C(COMMENT)
+	, target_sn INTEGER --POST_SN, COMMENT_SN
+	, user_sn INTEGER
+	, action_type CHAR(1) --A(add: 좋아요), D:(delete: 좋아요 취소-물리삭제)
+	, reg_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 
 
 
