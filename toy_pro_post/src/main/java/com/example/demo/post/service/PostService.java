@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 
-import com.example.demo.common.DTO.PageableDTO;
-import com.example.demo.common.DTO.SearchDTO;
+import com.example.demo.common.dto.PageableDTO;
+import com.example.demo.common.dto.SearchDTO;
 import com.example.demo.exception.ObjectNotFoundException;
 import com.example.demo.post.api.dto.PostCreateRequestDTO;
 import com.example.demo.post.api.dto.PostResponseDTO;

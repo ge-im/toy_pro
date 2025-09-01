@@ -12,8 +12,8 @@ import org.springframework.r2dbc.core.DatabaseClient.GenericExecuteSpec;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
-import com.example.demo.common.DTO.PageableDTO;
-import com.example.demo.common.DTO.SearchDTO;
+import com.example.demo.common.dto.PageableDTO;
+import com.example.demo.common.dto.SearchDTO;
 import com.example.demo.post.api.dto.PostSearchRequestDTO;
 import com.example.demo.post.domain.model.Post;
 

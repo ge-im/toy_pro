@@ -1,4 +1,4 @@
-package com.example.demo.exception;
+package com.example.demo.common.dto;
 
 import java.time.LocalDateTime;
 
@@ -13,9 +13,8 @@ import lombok.Setter;
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorResponseDTO {
-	private int code;
-	private String status;
-	private String message;
-	private LocalDateTime time;
+	private final int statusCode;
+	private final String message;
+	private final LocalDateTime time;
 	private String stackTrace;
 }

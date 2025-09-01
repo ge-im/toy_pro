@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.reactive.result.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -16,10 +15,12 @@ import org.springframework.web.server.ServerWebExchange;
 import com.example.demo.common.dto.ErrorResponseDTO;
 import com.example.demo.exception.ObjectNotFoundException;
 
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 @RestControllerAdvice
-public class GlobalErrorExceptionHandler extends ResponseEntityExceptionHandler {
+public class GlobalErrorExceptionHandler {
+	
 	/*
 	e.printStackTrace();
 	-> 프로필 지정
@@ -65,4 +66,5 @@ public class GlobalErrorExceptionHandler extends ResponseEntityExceptionHandler 
 		return Mono.just(ResponseEntity.status(status.value())
 				.body(new ErrorResponseDTO(status.value(), ex.getMessage(), LocalDateTime.now())));
 	}
+	
 }
