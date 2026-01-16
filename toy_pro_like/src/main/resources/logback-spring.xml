@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<property resource="application.yml"/>
+	<property name="LOG_LEVEL" value="DEBUG"/>
+	<property name="LOG_PATH" value="./logging" />
+	<!-- <property name="LOG_PATH" value="/home/nrc/howdah/logging" /> -->
+	<property name="LOG_FILE_NAME" value="application-log" />
+	<property name="ERR_LOG_FILE_NAME" value="application-error-log" />
+	<property name="LOG_PATTERN" value="%d %5p [%c] %m%n"/>
+	<!-- <property name="LOG_PATTERN" value="%d{yyyy/MM/dd HH:mm:ss.SSS} %magenta([%thread]) %highlight(%-5level) %logger{36} - %msg%n"/> -->
+	
+ 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+ 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+ 			<pattern>${LOG_PATTERN}</pattern>
+ 		</encoder>
+ 	</appender>
+ 	
+<!--  	일별로 로그 저장 : 이전파일 보기 -->
+	
+<!-- 	에러 로그 저장 : 이전파일 보기 -->
+ 
+	<root level="${LOG_LEVEL}">
+		<appender-ref ref="CONSOLE"/>
+	</root>
+    <logger name="org.springframework.data.r2dbc" level="${LOG_LEVEL}" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    <logger name="org.springframework.r2dbc.core" level="${LOG_LEVEL}" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    <logger name="io.r2dbc.postgresql.QUERY" level="${LOG_LEVEL}" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    <logger name="io.r2dbc.postgresql.PARAM" level="${LOG_LEVEL}" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+<!--
+	<logger name="com.zaxxer.hikari.pool.HikariPool" level="${LOG_LEVEL}" additivity="false">
+		<appender-ref ref="CONSOLE"/>
+	</logger>
+-->
+</configuration>
