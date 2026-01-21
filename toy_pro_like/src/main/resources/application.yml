@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: toy_pro_like
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/dev_toy?schema=dev_toy_schema01
+    username: toy_user
+    password: toypostgres
+  security:
+    user:
+      name: user
+      password: 1111
+  web:
+    error:
+      whitelabel: 
+        enabled: false
