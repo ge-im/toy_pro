@@ -1,4 +1,4 @@
-package com.example.demo.exception.handler;
+package com.example.demo.common.exception.handler;
 
 import java.time.LocalDateTime;
 
@@ -14,7 +14,7 @@ import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 import com.example.demo.common.dto.ErrorResponseDTO;
-import com.example.demo.exception.ObjectNotFoundException;
+import com.example.demo.common.exception.ObjectNotFoundException;
 
 import reactor.core.publisher.Mono;
 

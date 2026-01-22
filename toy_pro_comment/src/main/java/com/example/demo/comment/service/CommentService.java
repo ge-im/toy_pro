@@ -14,7 +14,7 @@ import com.example.demo.comment.domain.repository.CommentCustomRepository;
 import com.example.demo.comment.domain.repository.CommentRepository;
 import com.example.demo.common.dto.PageableDTO;
 import com.example.demo.common.dto.SearchDTO;
-import com.example.demo.exception.ObjectNotFoundException;
+import com.example.demo.common.exception.ObjectNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
