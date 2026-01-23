@@ -13,3 +13,7 @@ spring:
     error:
       whitelabel: 
         enabled: false
+  data:
+    redis:
+      host: localhost
+      port: 6379

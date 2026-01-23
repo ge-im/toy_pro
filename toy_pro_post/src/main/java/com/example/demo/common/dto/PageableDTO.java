@@ -1,12 +1,14 @@
 package com.example.demo.common.dto;
 
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder
 public class PageableDTO {
 
-	private static final int DEFAULT_PAGE = 0;
-	private static final int DEFAULT_SIZE = 20;
+	public static final int DEFAULT_PAGE = 0;
+	public static final int DEFAULT_SIZE = 20;
 	
 	private int page;
 	private int size;

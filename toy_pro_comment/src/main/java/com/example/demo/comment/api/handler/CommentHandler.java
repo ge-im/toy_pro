@@ -11,7 +11,7 @@ import com.example.demo.comment.api.dto.CommentResponseDTO;
 import com.example.demo.comment.api.dto.CommentUpdateRequestDTO;
 import com.example.demo.comment.service.CommentService;
 import com.example.demo.common.dto.PageableDTO;
-import com.example.demo.util.RequestParameterUtil;
+import com.example.demo.common.util.RequestParameterUtil;
 
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
