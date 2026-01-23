@@ -42,6 +42,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     runtimeOnly 'org.postgresql:postgresql'
     implementation 'org.postgresql:r2dbc-postgresql'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    
+    //jackson lib
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
     
     //log spi
     implementation 'io.r2dbc:r2dbc-proxy:1.1.6.RELEASE'
@@ -73,6 +78,6 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 
-//tasks.named('test') {
-//  useJUnitPlatform()
-//}
+tasks.named('test') {
+    useJUnitPlatform()
+}
