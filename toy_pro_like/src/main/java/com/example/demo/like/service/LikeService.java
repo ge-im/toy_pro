@@ -1,8 +1,17 @@
 package com.example.demo.like.service;
 
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
 
+import com.example.demo.common.exception.AlreadyLikedExcepction;
+import com.example.demo.common.exception.ObjectNotFoundException;
+import com.example.demo.like.domain.model.LikeHistory;
 import com.example.demo.like.domain.repository.LikeHistoryRepository;
+import com.example.demo.like.domain.repository.LikeRedisRepository;
+import com.example.demo.like.enums.LikeActionType;
+import com.example.demo.like.enums.TargetType;
+import com.example.demo.like.infra.redis.LikeRedisKeyGenerator;
 
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
@@ -11,40 +20,64 @@ import reactor.core.publisher.Mono;
 @Service
 @RequiredArgsConstructor
 public class LikeService {
-	//redis 연결 template
-	//likeHistoryRespository
-	private final LikeHistoryRepository repository;
+	
+	private final LikeRedisRepository redisRepository;
+	
+	private final LikeHistoryRepository historyRepository;
+	
+	private final LikeRedisKeyGenerator keyGenerator;
 
-	//api dto가 필요한지 고민...
-	//키값의 역할 target_type, target_sn, user_sn 
-	
-	public Mono<Boolean> checkLike(String targetType, long targetSn, long userSn) {
-		//redis 단건 존재 여부 조회
-		return null;
+	public Mono<Boolean> isLiked(TargetType targetType, long targetSn, long userSn) {
+		return redisRepository.isLiked(keyGenerator.generate(targetType, targetSn), userSn);
 	}
 	
-	public Mono<Long> countLike(String targetType, long targetSn) {
-		//redis 실시간 개수 조회
-		return null;
+	public Mono<Long> countLikes(TargetType targetType, long targetSn) {
+		return redisRepository.countLikes(keyGenerator.generate(targetType, targetSn));
 	}
 	
-	public Flux<Long> findUserIdsByLikes(String targetType, long targetSn) {
-		//redis 조건 목록 조회
-		return null;
+	public Flux<Long> findIsLikedUsers(TargetType targetType, long targetSn) {
+		return redisRepository.findIsLikedUsers(keyGenerator.generate(targetType, targetSn));
 	}
 	
-	public Mono<Void> doLike(String targetType, long targetSn, long userSn) {
-		//redis 단건 존재 여부 조회
-		//존재한다면 오류(200번대 response중 적합한 걸로 return)
-		//존재하지 않으면 redis에 insert + 결과 확인 후 t_like_h01에 insert
-		//두가지 모두 성공해야 200 return
-		return null;
+	public Mono<Void> like(TargetType targetType, long targetSn, long userSn) {
+		String key = keyGenerator.generate(targetType, targetSn);
+		
+		return redisRepository.isLiked(key, userSn)
+							  .flatMap(e -> {
+								  if(e)
+									  return Mono.error(new AlreadyLikedExcepction("Already Liked"));
+								  else
+									  return redisRepository.addLike(key, userSn)
+									  				 .then(historyRepository.save(getHistory(targetType, targetSn, userSn, LikeActionType.REMOVE)));
+									  
+							  })
+							  .then();
 	}
 	
-	public Mono<Void> undoLike(String targetType, long targetSn, long userSn) {
-		//redis 단건 존재 여부 조회
-		//존재하지 않으면 오류(200번대 response중 적합한 걸로 return)
-		//존재하면 redis에 delete + 결과 확인 후 t_like_h01에 insert
-		return null;
+	public Mono<Void> unLike(TargetType targetType, long targetSn, long userSn) {
+		String key = keyGenerator.generate(targetType, targetSn);
+		
+		return redisRepository.isLiked(key, userSn)
+							  .flatMap(e -> {
+								  if(e)
+									  return redisRepository.removeLike(key, userSn)
+											  		.then(historyRepository.save(getHistory(targetType, targetSn, userSn, LikeActionType.REMOVE)));
+								  else
+									  return Mono.error(new ObjectNotFoundException("no history for like"));
+							  })
+							  .then();
 	}
+	
+	private LikeHistory getHistory(TargetType targetType, long targetSn, long userSn, LikeActionType actionType) {
+		LikeHistory result = new LikeHistory();
+		
+		result.setTargetType(targetType.getValue());
+		result.setTargetSn(targetSn);
+		result.setUserSn(userSn);
+		result.setActionType(actionType.getValue());
+		result.setRedDt(LocalDateTime.now());
+		
+		return result;
+	}
+	
 }
