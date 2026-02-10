@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 
-import com.example.demo.common.exception.AlreadyLikedExcepction;
-import com.example.demo.common.exception.ObjectNotFoundException;
+import com.example.demo.common.error.exception.AlreadyLikedExcepction;
+import com.example.demo.common.error.exception.ObjectNotFoundException;
 import com.example.demo.like.domain.model.LikeHistory;
 import com.example.demo.like.domain.repository.LikeHistoryRepository;
 import com.example.demo.like.domain.repository.LikeRedisRepository;
