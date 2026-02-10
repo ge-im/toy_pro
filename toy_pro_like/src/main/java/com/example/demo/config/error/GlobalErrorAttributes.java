@@ -12,8 +12,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.server.ServerRequest;
 
 import com.example.demo.common.error.code.ErrorCode;
+import com.example.demo.common.error.code.HttpErrorCode;
 import com.example.demo.common.error.exception.BusinessException;
-import com.example.demo.common.error.exception.HttpErrorCode;
 
 @Component
 public class GlobalErrorAttributes extends DefaultErrorAttributes {
@@ -28,7 +28,7 @@ public class GlobalErrorAttributes extends DefaultErrorAttributes {
 		attributes.put("status", errorCode.getHttpStatus().value());
 		attributes.put("code", errorCode.getCode());
 		attributes.put("message", resolveMessage(e));
-		attributes.put("timestamp", LocalDateTime.now().toString());
+		attributes.put("time", LocalDateTime.now().toString());
 		attributes.put("path", request.path());
 		
 		return attributes;

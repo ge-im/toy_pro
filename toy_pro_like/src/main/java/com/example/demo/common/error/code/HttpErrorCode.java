@@ -1,8 +1,6 @@
-package com.example.demo.common.error.exception;
+package com.example.demo.common.error.code;
 
 import org.springframework.http.HttpStatus;
-
-import com.example.demo.common.error.code.ErrorCode;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
