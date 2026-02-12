@@ -20,7 +20,11 @@ CREATE TABLE dev_toy_schema01.t_role_m01 (
 	role_sn SERIAL PRIMARY KEY
 	, role_cd VARCHAR(30) NOT NULL
 	, role_nm VARCHAR(100)
-	, up_auth_sn INTEGER
+);
+
+CREATE TABLE dev_toy_schema01.t_role_hierarchy_s01 (
+	parent_role_sn INTEGER
+    , child_role_sn INTEGER
 );
 
 CREATE TABLE dev_toy_schema01.t_user_role_s01 (
