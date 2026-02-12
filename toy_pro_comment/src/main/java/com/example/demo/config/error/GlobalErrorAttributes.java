@@ -4,9 +4,8 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.jspecify.annotations.Nullable;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
-import org.springframework.boot.webflux.error.DefaultErrorAttributes;
+import org.springframework.boot.web.reactive.error.DefaultErrorAttributes;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -19,7 +18,7 @@ import com.example.demo.common.error.exception.BusinessException;
 public class GlobalErrorAttributes extends DefaultErrorAttributes {
 	
 	@Override
-	public Map<String, @Nullable Object> getErrorAttributes(ServerRequest request, ErrorAttributeOptions options) {
+	public Map<String, Object> getErrorAttributes(ServerRequest request, ErrorAttributeOptions options) {
 		Throwable e = getError(request);
 		
 		Map<String, Object> attributes = new LinkedHashMap<>();
