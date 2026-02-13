@@ -13,6 +13,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import com.example.demo.common.error.code.ErrorCode;
 import com.example.demo.common.error.code.HttpErrorCode;
 import com.example.demo.common.error.exception.BusinessException;
+import com.example.demo.common.error.exception.HttpException;
 
 @Component
 public class GlobalErrorAttributes extends DefaultErrorAttributes {
@@ -49,6 +50,9 @@ public class GlobalErrorAttributes extends DefaultErrorAttributes {
 //	}
 	
 	private String resolveMessage(Throwable e) {
-		return StringUtils.hasText(e.getMessage()) ? e.getMessage() : "Unexpected error occured";
+		if(e instanceof BusinessException || e instanceof HttpException) 
+			return StringUtils.hasText(e.getMessage()) ? e.getMessage() : "Unexpected error occured";
+		
+		return "Unexpected error occured";
 	}
 }
