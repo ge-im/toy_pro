@@ -23,6 +23,14 @@ eclipse {
     }
 }
 
+sourceSets {
+    main {
+        java {
+            srcDirs += "$buildDir/generated/sources/annotationProcessor/java/main"
+        }
+    }
+}
+
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
