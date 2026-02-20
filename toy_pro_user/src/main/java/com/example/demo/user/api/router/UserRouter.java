@@ -32,9 +32,9 @@ public class UserRouter {
 		 */
 		return RouterFunctions.route()
 					.path("/users", builder -> builder
+							.GET("/{userSn}", handler::findById)
 							.GET(handler::findAll)
 							.POST("/search", handler::searchUsers)
-							.GET("/{userSn}", handler::findById)
 							.POST(handler::create)
 							.PUT(handler::update)
 							.DELETE(handler::delete))

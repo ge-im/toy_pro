@@ -62,6 +62,15 @@ public class UserCustomRepository {
 		for(Entry<String, Object> entry : params.entrySet()) 
 			spec = spec.bind(entry.getKey(), entry.getValue());
 		
+//		User result = new User();
+//		result.setUserSn(r.get("user_sn", Long.class)); 
+//		result.setUserId(r.get("user_id", String.class)); 
+//		result.setUserNm(r.get("user_nm", String.class)); 
+//		result.setUserPswd(r.get("user_pswd", String.class)); 
+//		result.setDelYn(r.get("del_yn", String.class));
+//		result.setRegDt(r.get("reg_dt", LocalDateTime.class)); 
+//		result.setUpdtDt(r.get("updt_dt", LocalDateTime.class));
+		
 		return spec.map(r -> new User(
 					r.get("user_sn", Long.class), 
 					r.get("user_id", String.class), 

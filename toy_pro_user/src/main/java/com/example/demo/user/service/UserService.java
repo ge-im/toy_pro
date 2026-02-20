@@ -4,6 +4,8 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.common.dto.PageableDTO;
 import com.example.demo.common.dto.SearchDTO;
+import com.example.demo.common.error.code.BusinessErrorCode;
+import com.example.demo.common.error.exception.BusinessException;
 import com.example.demo.user.api.dto.UserCreateRequestDTO;
 import com.example.demo.user.api.dto.UserResponseDTO;
 import com.example.demo.user.api.dto.UserSearchRequestDTO;
@@ -50,32 +52,33 @@ public class UserService {
 		return userRepository.findById(userSn).map(userMapper::toResponse);
 	}
 	
-	public Mono<UserResponseDTO> create(UserCreateRequestDTO dto) {
+	public Mono<Long> create(UserCreateRequestDTO dto) {
 		User u = userMapper.toEntity(dto);
 		u.setDelYn("N");
 		u.setRegDt(java.time.LocalDateTime.now());
 		u.setUpdtDt(java.time.LocalDateTime.now());
 		
-		//id 체크 한번 더 -> id가 없으면 저장, 있으면 exception 처리로 변경
+		//id 중복체크 할지 안할지 정하기, unique key 제약을 두면 오류가 나긴함
+		// ==>> 정책 정하기
 		return userRepository.save(u)
-							 .map(userMapper::toResponse);
+							 .map(r -> r.getUserSn());
 	}
 	
-	public Mono<UserResponseDTO> update(UserUpdateRequestDTO dto) {
+	public Mono<Void> update(UserUpdateRequestDTO dto) {
 		return userRepository.findById(dto.userSn())
 					  .filter(u -> "N".equals(u.getDelYn()))
-//					  .switchIfEmpty(Mono.error(new user)) //사용자 없음(오류)
+					  .switchIfEmpty(Mono.error(new BusinessException(BusinessErrorCode.OBJECT_NOT_FOUND)))
 					  .flatMap(u -> {
 						  userMapper.updateEntityFromDto(dto, u);
 						  return userRepository.save(u);
 					  })
-					  .map(userMapper::toResponse);
+					  .then();
 	}
 	
 	public Mono<Void> delete(long userSn) {
 		return userRepository.findById(userSn)
 					.filter(u -> "N".equals(u.getDelYn()))
-//					.switchIfEmpty(Mono.error(new user)) //사용자 없음(오류)
+					.switchIfEmpty(Mono.error(new BusinessException(BusinessErrorCode.OBJECT_NOT_FOUND)))
 					.flatMap(u -> {
 						u.setDelYn("Y");
 						u.setUpdtDt(java.time.LocalDateTime.now());
