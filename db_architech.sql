@@ -1,33 +1,36 @@
 /*
-DB user 및 schema
+database, user, schema
 
-admin_postgre: 모든 권한 보유 (superuser)
-dev_toy: 개발 전용 DB
+toy_user: 개발 전용 db 계정 DB 접속 + 특정 스키마에서만 DML 가능
+dev_toy: 개발 전용 database
 dev_toy_schema01: 개발자가 작업할 수 있는 구역
 */
 
 CREATE TABLE dev_toy_schema01.t_user_m01 (
 	user_sn SERIAL NOT NULL PRIMARY KEY
-	, user_id VARCHAR(20) NOT NULL 
+	, user_id VARCHAR(20) NOT NULL
 	, user_nm VARCHAR(100) 
-	, user_pswd VARCHAR(200) 
-	, del_yn CHAR(1) 
-	, reg_dt TIMESTAMP 
+	, user_pswd VARCHAR(255) 
+	, del_yn CHAR(1) DEFAULT 'N'
+	, reg_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 	, updt_dt TIMESTAMP
 );
 
-CREATE TABLE dev_toy_schema01.t_auth_m01 (
-	auth_sn SERIAL NOT NULL PRIMARY KEY
-	, auth_cd VARCHAR(20) NOT NULL
-	, auth_nm VARCHAR(200)
-	, up_auth_sn INTEGER
+CREATE TABLE dev_toy_schema01.t_role_m01 (
+	role_sn SERIAL PRIMARY KEY
+	, role_cd VARCHAR(30) NOT NULL
+	, role_nm VARCHAR(100)
 );
 
---sn or cd/id? 뭘로 해야하나?
-CREATE TABLE dev_toy_schema01.t_user_auth_s01 (
-	sn SERIAL NOT NULL PRIMARY KEY
-	, user_id INTEGER
-	, auth_cd INTEGER
+CREATE TABLE dev_toy_schema01.t_role_hierarchy_s01 (
+	parent_role_sn INTEGER
+    , child_role_sn INTEGER
+);
+
+CREATE TABLE dev_toy_schema01.t_user_role_s01 (
+	user_role_sn SERIAL NOT NULL PRIMARY KEY
+	, user_sn INTEGER
+	, role_sn INTEGER
 );
 
 CREATE TABLE dev_toy_schema01.t_post_m01 (
