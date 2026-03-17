@@ -6,10 +6,15 @@ db 초기 설정
 3. 2번의 관리자 계정이 개발용으로 쓰일 db, db내에 특정 개발용 schema, 사용자(개발자) user 생성 예정
 4. 사용자(개발자)는 테이블 dml 필요
 
-admin_postgre: 모든 권한 보유 (superuser)
-toy_user: 개발 전용 db 계정 DB 접속 + 특정 스키마에서만 DML 가능
+Database 구조
 dev_toy: 개발 전용 DB
+
+Schema 구조
 dev_toy_schema01: 개발자가 작업할 수 있는 구역
+
+DB User 목록 
+admin_postgre: 모든 권한 보유 (superuser)
+toy_user: 개발 전용 db 계정 DB 접속 + 특정 스키마(dev_toy_schema01)에서만 DML 가능
 
 */
 

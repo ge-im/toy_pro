@@ -1,8 +1,8 @@
 /*
-DB user 및 schema
+database, user, schema
 
-admin_postgre: 모든 권한 보유 (superuser)
-dev_toy: 개발 전용 DB
+toy_user: 개발 전용 db 계정 DB 접속 + 특정 스키마에서만 DML 가능
+dev_toy: 개발 전용 database
 dev_toy_schema01: 개발자가 작업할 수 있는 구역
 */
 
@@ -72,14 +72,6 @@ CREATE TABLE dev_toy_schema01.t_like_h01 (
 	, reg_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE dev_toy_schema01.t_authur_h01 (
-	sn SERIAL NOT NULL PRIMARY KEY
-	, target_type CHAR(1) --P:(POST), C(COMMENT)
-	, target_sn INTEGER --POST_SN, COMMENT_SN
-	, user_sn INTEGER
-	, action_type CHAR(1) --A(add: 좋아요), D:(delete: 좋아요 취소-물리삭제)
-	, reg_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
 
 
 
