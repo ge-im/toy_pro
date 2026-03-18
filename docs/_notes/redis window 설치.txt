@@ -1,0 +1,40 @@
+1	노트북 가상화 설정 활성화
+2	wsl 및 ubuntu 설치
+3	docker 설치
+4	ubuntu update
+--분기점
+5	redis 직접 설치 및 구동
+6	redis docker 설치 및 컨테이너 구동
+
+
+1-1. BIOS 진입(내 노트북 fn+F2 연타)
+1-2. Configuration - Intel Virtualization Technology  Enabled로 변경 후 저장
+1-3. 작업관리자 - 성능 화면에서 가상화 여부 확인 가능
+2-1. windows powershell 관리자 모드로 실행 
+2-2. "wsl --install" , wsl 설치(ubuntu 자동 설치)
+		** 처음 설치할 때 하위시스템 설치 오류남(0x87e11838) 다시 install하니깐 설치됨
+		(참고) ubuntu 버전 지정을 원할시 "wsl --install --no-distribution" 로 설치 진행
+2-3. 이후 재부팅, ubuntu 설치 이어서 진행 완료후 unix account 설정 완료
+		(정보) unix user account imge/roqkfdyd
+3-1. docker 홈페이지(https://docs.docker.com/desktop/setup/install/windows-install/)에서 docker 설치
+		(정보) v4.55.0
+3-2. personal 버전으로 계정 연결 이후 설치 완료
+3-3. Settings -> Resources -> WSL Integration, Enable integration with my default WSL distro랑 Ubuntu 활성화 체크
+4-1. wsl 실행
+4-2. "sudo apt update && sudo apt upgrade -y" , ubuntu update 진행
+5-1. "sudo apt install redis -y" 명령어 수행, redis 설치
+5-2 . "sudo service redis-server start" , Redis 서버 시작
+5-3. redis-cli ping" ,  Redis 동작 확인 (결과: PONG)
+6-1. "docker run -d --name redis-container -p 6379:6379 redis" , docker redis 컨테이너 기동
+6-2. "docker ps" , 실행 중인 컨테이너 확인(리스트중 redis 확인)
+6-3. "docker exec -it redis-container redis-cli" , Redis CLI 접속
+6-4. "ping", cli 동작 확인(결과: PONG)
+
+
+*참고용 1-3 : windows Hyper-V 활성화
+	-> 사용하지 않은 이유? 운영체제 자체 VM + docker VM 구성으로 시스템 사용량이 너무 많아짐
+
+1. windows powershell 관리자 모드로 실행
+2. "Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All" 입력
+3. 재부팅 옵션에서 y 입력 후 재부팅(프로그램이 있다면 n하고 종료 후 재부팅)
+4. (참고) 비활성화시 "Disable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V" 입력
