@@ -1,0 +1,12 @@
+1. spring-boot-starter-data-redis 의존성 추가
+	implementation  'org.springframework.boot:spring-boot-starter-data-redis:4.0.1'  build.gradle 의존성 추가
+2. application.yml 연결 설정
+	spring: data: redis: host/port
+3. RedisConfig.class 생성
+	3-1. host, port value 로드 후 connectionfactory setting에 사용
+	3-2. LettuceConnectionFactory return 하는 RedisConnectionFactory bean 생성 
+	3-3. redisTemplate bean 생성 (Jackson lib를 사용하여 json 직렬화를 사용 + ObjectMapper를 통해 설정값 변경
+ 	 	 (참고 : 직렬화 객체 설정을 따로 하지 않으면 defualt로 JdkSerializationRedisSerializer로 셋팅) 
+	3-4. 해당 프로젝트는 객체화된 데이터 상태를 저장하지 않기 때문에 stringRedisTemplate(StringRedisSerializer로 기본 설정) bean을 생성 
+	3-5. RedisTemplate는 blocking 방식 요청이기 때문에 WebFlux프로그램은ReactiveRedisTemplate을 사용
+	 	(중요) 1 ~ 4번 과정 Reactive 객체로 바꿔서 함수까지 유사하게 실행 가능
