@@ -1,24 +1,21 @@
-# WebFlux MSA Toy Project
+# Spring WebFlux Community API Toy Project
 
 ## 1. 프로젝트 소개
 
-본 프로젝트는 Spring WebFlux 기반으로  
-사용자(User), 게시글(Post), 댓글(Comment), 좋아요(Like) 기능을  
-도메인 중심 구조로 설계한 토이 프로젝트입니다.
+본 프로젝트는 Spring WebFlux 기반으로 사용자(User), 게시글(Post), 댓글(Comment), 좋아요(Like) 기능을 도메인 중심으로 설계한 개인 프로젝트입니다.  
 
-단순 CRUD 구현을 넘어  
-Reactive 환경에서의 구조 설계, Redis 활용, 인증/인가 시스템까지  
-직접 설계하고 적용하는 것을 목표로 개발했습니다.
+Java/Spring Framework 실무 경험 이후, Spring WebFlux 기반의 비동기 요청 처리 구조를 직접 학습하고 구현해 보기 위해 진행했습니다.  
+단순 CRUD 구현을 넘어 Reactive 환경의 요청 처리 구조, Redis를 활용한 상태 관리, JWT 기반 인증·인가 구조를 직접 설계하고 적용하는 것을 목표로 개발했습니다.
 
 ---
 
 ## 2. 주요 기술 스택
 
 - Java / Spring Boot
-- Spring WebFlux
+- Spring WebFlux / Spring Security
+- PostgreSQL / R2DBC
 - Redis
-- JWT (Authentication)
-- PostgreSQL
+- JWT 
 
 ---
 
@@ -84,10 +81,18 @@ like : 좋아요 도메인
 
 ---
 
-## 6. 실행 방법
+## 6. 실행 환경
 
-```bash
-# (추후 작성 예정)
+- Java 21
+- PostgreSQL
+- Redis
+
+```
+PostgreSQL 데이터베이스 생성
+(db_init.sql, db_architech.sql, db_data_init.sql) 
+→ Redis 서버 실행 
+→ application 설정에서 DB 및 Redis 연결 정보 구성 
+→ Spring Boot 애플리케이션 실행
 ```
 
 ## 7. 향후 개선 계획
