@@ -3,16 +3,15 @@ package com.example.demo.config.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
 import com.example.demo.auth.security.filter.JwtAuthenticationFilter;
+import com.example.demo.common.error.code.HttpErrorCode;
 
 import lombok.RequiredArgsConstructor;
-import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 @Configuration
@@ -20,6 +19,7 @@ import reactor.core.publisher.Mono;
 public class SecurityConfig {
 	
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
+	private final SecurityErrorResponseWriter securityErrorResponseWriter;
 	 
 	@Bean
 	SecurityWebFilterChain springSecurityWebFilterChain(ServerHttpSecurity http) throws Exception {
@@ -50,18 +50,18 @@ public class SecurityConfig {
 		        .authorizeExchange(auth -> auth
 		        		.pathMatchers("/auth/login", "/auth/reissue").permitAll()
 		        		.pathMatchers("/error").permitAll()
-		                .pathMatchers(HttpMethod.GET, "/**").hasAnyRole("ROLE_ADMIN", "ROLE_USER")
-		                .pathMatchers(HttpMethod.POST, "/**").hasAnyRole("ROLE_ADMIN", "ROLE_USER")
-		                .pathMatchers(HttpMethod.PUT, "/**").hasAnyRole("ROLE_ADMIN", "ROLE_USER")
-		                .pathMatchers(HttpMethod.DELETE, "/**").hasAnyRole("ROLE_ADMIN")
+		                .pathMatchers(HttpMethod.GET, "/**").hasAnyRole("ADMIN", "USER")
+		                .pathMatchers(HttpMethod.POST, "/**").hasAnyRole("ADMIN", "USER")
+		                .pathMatchers(HttpMethod.PUT, "/**").hasAnyRole("ADMIN", "USER")
+		                .pathMatchers(HttpMethod.DELETE, "/**").hasAnyRole("ADMIN")
 		                .anyExchange().authenticated()
 		        )
 		        .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
 		        .exceptionHandling(e -> e
 		        	.authenticationEntryPoint((exchange, ex) ->
-		        		Mono.fromRunnable(() -> exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED)))
+					securityErrorResponseWriter.write(exchange, HttpErrorCode.UNAUTHORIZED))
 		        	.accessDeniedHandler((exchange, ex) -> 
-		        		Mono.fromRunnable(() -> exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN)))
+					securityErrorResponseWriter.write(exchange, HttpErrorCode.FORBIDDEN))
 		        )
 		        .build();
 	}

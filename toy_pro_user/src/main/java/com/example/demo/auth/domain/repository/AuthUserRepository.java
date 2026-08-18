@@ -24,7 +24,6 @@ public interface AuthUserRepository extends ReactiveCrudRepository<AuthUser, Lon
 			 	, user_nm
 			 	, user_pswd
 			FROM t_user_m01
-				INNER JOIN
 			WHERE del_yn = 'N' 
 				AND user_Id = :userId 
 			""")
