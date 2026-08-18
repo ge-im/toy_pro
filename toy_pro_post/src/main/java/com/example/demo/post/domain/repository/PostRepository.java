@@ -20,7 +20,7 @@ public interface PostRepository extends ReactiveCrudRepository<Post, Long> {
 				, p.content
 				, p.view_cnt
 				, p.del_yn
-				, p.red_dt
+				, p.reg_dt
 				, p.updt_dt
 			FROM t_post_m01 p INNER JOIN t_user_m01 u
 			 		ON ( p.user_sn = u.user_sn)
@@ -43,7 +43,7 @@ public interface PostRepository extends ReactiveCrudRepository<Post, Long> {
 				, p.content
 				, p.view_cnt
 				, p.del_yn
-				, p.red_dt
+				, p.reg_dt
 				, p.updt_dt
 			FROM t_post_m01 p INNER JOIN t_user_m01 u
 			 		ON ( p.user_sn = u.user_sn)
