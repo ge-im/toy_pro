@@ -5,6 +5,9 @@ import java.util.Arrays;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import com.example.demo.common.error.code.BusinessErrorCode;
+import com.example.demo.common.error.exception.BusinessException;
+
 @Getter
 @RequiredArgsConstructor
 public enum TargetType {
@@ -17,7 +20,7 @@ public enum TargetType {
 		return Arrays.stream(values())
 				.filter(e -> e.value.equals(value))
 				.findFirst()
-				.orElseThrow(() -> new IllegalArgumentException("Illegal targetType"));
+				.orElseThrow(() -> new BusinessException(BusinessErrorCode.INVALID_REQUEST_PARAMETER));
 	}
 	
 }

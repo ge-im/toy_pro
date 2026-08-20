@@ -38,6 +38,8 @@ public class GlobalErrorAttributes extends DefaultErrorAttributes {
 		
 		if(error instanceof BusinessException be)
 			return be.getErrorCode();
+		if(error instanceof HttpException he)
+			return he.getErrorCode();
 		
 		//error처리 목록 정리 필요
 		

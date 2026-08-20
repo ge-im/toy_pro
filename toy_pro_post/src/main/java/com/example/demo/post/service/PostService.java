@@ -6,7 +6,8 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.common.dto.PageableDTO;
 import com.example.demo.common.dto.SearchDTO;
-import com.example.demo.common.exception.ObjectNotFoundException;
+import com.example.demo.common.error.code.BusinessErrorCode;
+import com.example.demo.common.error.exception.BusinessException;
 import com.example.demo.post.api.dto.PostCreateRequestDTO;
 import com.example.demo.post.api.dto.PostResponseDTO;
 import com.example.demo.post.api.dto.PostSearchRequestDTO;
@@ -35,7 +36,7 @@ public class PostService {
 	public Mono<PostResponseDTO> findPostById(long postSn) {
 		return repository.findPostById(postSn)
 						 .filter(p -> "N".equals(p.getDelYn()))
-						 .switchIfEmpty(Mono.error(new ObjectNotFoundException()))
+						 .switchIfEmpty(Mono.error(new BusinessException(BusinessErrorCode.OBJECT_NOT_FOUND)))
 						 .map(postMapper::toResponse);
 	}
 	
@@ -43,9 +44,9 @@ public class PostService {
 		return repository.increaseViewCount(postSn)
 						 .flatMap(rows -> {
 							 if (rows == 0) 
-								 return Mono.error(new ObjectNotFoundException("post not found"));
+								 return Mono.error(new BusinessException(BusinessErrorCode.OBJECT_NOT_FOUND));
 							 else if (rows > 1) 
-								 return Mono.error(new IllegalStateException("Unexpected update"));
+								 return Mono.error(new BusinessException(BusinessErrorCode.INVALID_STATE));
 							 else 
 								 return Mono.empty();
 						 });
@@ -69,7 +70,7 @@ public class PostService {
 	public Mono<PostResponseDTO> update(PostUpdateRequestDTO dto) {
 		return repository.findById(dto.postSn())
 						 .filter(p -> "N".equals(p.getDelYn()))
-						 .switchIfEmpty(Mono.error(new ObjectNotFoundException()))
+						 .switchIfEmpty(Mono.error(new BusinessException(BusinessErrorCode.OBJECT_NOT_FOUND)))
 						 .flatMap(p -> {
 							 postMapper.updateEntityFromDto(dto, p);
 							 p.setUpdtDt(LocalDateTime.now());
@@ -81,7 +82,7 @@ public class PostService {
 	public Mono<Void> delete(long postSn) {
 		return repository.findById(postSn)
 						 .filter(p -> "N".equals(p.getDelYn()))
-						 .switchIfEmpty(Mono.error(new ObjectNotFoundException()))
+						 .switchIfEmpty(Mono.error(new BusinessException(BusinessErrorCode.OBJECT_NOT_FOUND)))
 						 .flatMap(p -> {
 							 p.setDelYn("Y");
 							 p.setUpdtDt(LocalDateTime.now());

@@ -1,7 +1,5 @@
 package com.example.demo.config.security;
 
-import java.util.Map;
-
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
@@ -30,7 +28,7 @@ public class SecurityErrorResponseWriter {
 		response.setStatusCode(errorCode.getHttpStatus());
 		response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
-		Map<String, Object> body = errorResponseFactory.create(
+		var body = errorResponseFactory.create(
 			errorCode,
 			errorCode.getMessage(),
 			exchange.getRequest().getPath().value()

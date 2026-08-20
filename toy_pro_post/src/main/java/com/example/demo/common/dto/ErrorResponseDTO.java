@@ -1,6 +1,7 @@
 package com.example.demo.common.dto;
 
-import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -13,8 +14,19 @@ import lombok.Setter;
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorResponseDTO {
-	private final int statusCode;
+	private final int status;
+	private final String code;
 	private final String message;
-	private final LocalDateTime time;
-	private String stackTrace;
+	private final String time;
+	private final String path;
+
+	public static ErrorResponseDTO from(Map<String, Object> attributes) {
+		return new ErrorResponseDTO(
+			((Number) attributes.getOrDefault("status", 500)).intValue(),
+			(String) attributes.getOrDefault("code", ""),
+			(String) attributes.getOrDefault("message", "Unexpected error occurred"),
+			(String) attributes.getOrDefault("time", ""),
+			(String) attributes.getOrDefault("path", "")
+		);
+	}
 }

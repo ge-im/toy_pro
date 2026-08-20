@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum HttpErrorCode implements ErrorCode {
-	INTERVAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "", "Interval Server Error")
+	INTERVAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", "Internal Server Error")
 	;
 	
 	private final HttpStatus httpStatus;

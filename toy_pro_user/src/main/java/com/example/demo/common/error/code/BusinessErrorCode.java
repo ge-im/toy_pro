@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 public enum BusinessErrorCode implements ErrorCode {
 	//common not found object, 400
 	OBJECT_NOT_FOUND(HttpStatus.BAD_REQUEST, "OBJECT_NOT_FOUND", "Object not found"),
+	INVALID_REQUEST_PARAMETER(HttpStatus.BAD_REQUEST, "INVALID_REQUEST_PARAMETER", "Invalid request parameter"),
 	
 	//like
 	LIKE_ALREADY_EXISTS(HttpStatus.CONFLICT, "LIKE_ALREADY_EXISTS", "Like already exists"),
