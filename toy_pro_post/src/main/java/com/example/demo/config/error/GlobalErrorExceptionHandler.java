@@ -17,6 +17,8 @@ import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+import com.example.demo.common.dto.ErrorResponseDTO;
+
 import reactor.core.publisher.Mono;
 
 @Component
@@ -39,10 +41,11 @@ public class GlobalErrorExceptionHandler extends AbstractErrorWebExceptionHandle
 		Map<String, Object> errorProperties = getErrorAttributes(request, ErrorAttributeOptions.defaults());
 		
 		int status = (int) errorProperties.getOrDefault("status", 500);
+		ErrorResponseDTO errorResponse = ErrorResponseDTO.from(errorProperties);
 		
 		return ServerResponse.status(status)
 							 .contentType(MediaType.APPLICATION_JSON)
-							 .bodyValue(errorProperties);
+							 .bodyValue(errorResponse);
 	}
 
 }

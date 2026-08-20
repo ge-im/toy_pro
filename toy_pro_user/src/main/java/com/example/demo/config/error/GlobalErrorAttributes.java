@@ -26,13 +26,15 @@ public class GlobalErrorAttributes extends DefaultErrorAttributes {
 	public Map<String, Object> getErrorAttributes(ServerRequest request, ErrorAttributeOptions options) {
 		Throwable e = getError(request);
 		ErrorCode errorCode = resolveErrorCode(e);
-		return errorResponseFactory.create(errorCode, resolveMessage(e), request.path());
+		return errorResponseFactory.create(errorCode, resolveMessage(e), request.path()).toAttributes();
 	}
 	
 	private ErrorCode resolveErrorCode(Throwable error) {
 		
 		if(error instanceof BusinessException be)
 			return be.getErrorCode();
+		if(error instanceof HttpException he)
+			return he.getErrorCode();
 		
 		//error처리 목록 정리 필요
 		

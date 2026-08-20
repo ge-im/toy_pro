@@ -14,7 +14,8 @@ import com.example.demo.comment.domain.repository.CommentCustomRepository;
 import com.example.demo.comment.domain.repository.CommentRepository;
 import com.example.demo.common.dto.PageableDTO;
 import com.example.demo.common.dto.SearchDTO;
-import com.example.demo.common.exception.ObjectNotFoundException;
+import com.example.demo.common.error.code.BusinessErrorCode;
+import com.example.demo.common.error.exception.BusinessException;
 
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
@@ -56,7 +57,7 @@ public class CommentService {
 	public Mono<Void> update(CommentUpdateRequestDTO dto) {
 		return repository.findById(dto.commentSn())
 						 .filter(p -> "N".equals(p.getDelYn()))
-						 .switchIfEmpty(Mono.error(new ObjectNotFoundException()))
+						 .switchIfEmpty(Mono.error(new BusinessException(BusinessErrorCode.OBJECT_NOT_FOUND)))
 						 .flatMap(p -> {
 							 mapper.updateEntityFromDto(dto, p);
 							 p.setUpdtDt(LocalDateTime.now());
@@ -68,7 +69,7 @@ public class CommentService {
 	public Mono<Void> delete(long commentSn) {
 		return repository.findById(commentSn)
 						 .filter(p -> "N".equals(p.getDelYn()))
-						 .switchIfEmpty(Mono.error(new ObjectNotFoundException()))
+						 .switchIfEmpty(Mono.error(new BusinessException(BusinessErrorCode.OBJECT_NOT_FOUND)))
 						 .flatMap(p -> {
 							 p.setDelYn("Y");
 							 p.setUpdtDt(LocalDateTime.now());

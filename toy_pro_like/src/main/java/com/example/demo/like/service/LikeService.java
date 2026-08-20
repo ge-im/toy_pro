@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 
-import com.example.demo.common.error.exception.AlreadyLikedExcepction;
-import com.example.demo.common.error.exception.ObjectNotFoundException;
+import com.example.demo.common.error.code.BusinessErrorCode;
+import com.example.demo.common.error.exception.BusinessException;
 import com.example.demo.like.domain.model.LikeHistory;
 import com.example.demo.like.domain.repository.LikeHistoryRepository;
 import com.example.demo.like.domain.repository.LikeRedisRepository;
@@ -45,7 +45,7 @@ public class LikeService {
 		return redisRepository.isLiked(key, userSn)
 							  .flatMap(e -> {
 								  if(e)
-									  return Mono.error(new AlreadyLikedExcepction("Already Liked"));
+									  return Mono.error(new BusinessException(BusinessErrorCode.LIKE_ALREADY_EXISTS));
 								  else
 									  return redisRepository.addLike(key, userSn)
 									  				 .then(historyRepository.save(getHistory(targetType, targetSn, userSn, LikeActionType.REMOVE)));
@@ -63,7 +63,7 @@ public class LikeService {
 									  return redisRepository.removeLike(key, userSn)
 											  		.then(historyRepository.save(getHistory(targetType, targetSn, userSn, LikeActionType.REMOVE)));
 								  else
-									  return Mono.error(new ObjectNotFoundException("no history for like"));
+									  return Mono.error(new BusinessException(BusinessErrorCode.OBJECT_NOT_FOUND));
 							  })
 							  .then();
 	}

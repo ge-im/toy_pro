@@ -6,6 +6,8 @@ import java.time.format.DateTimeFormatter;
 import org.springframework.web.reactive.function.server.ServerRequest;
 
 import com.example.demo.common.dto.PageableDTO;
+import com.example.demo.common.error.code.BusinessErrorCode;
+import com.example.demo.common.error.exception.BusinessException;
 
 public class RequestParameterUtil {
 	
@@ -13,13 +15,13 @@ public class RequestParameterUtil {
 
 	public static LocalDateTime getRequiredQueryParamAsDateTime(ServerRequest req, String name) {
         return req.queryParam(name)
-                  .map(param -> LocalDateTime.parse(param, DEFAULT_FORMATTER))
-                  .orElseThrow(() -> new IllegalArgumentException(name + " is required"));
+				  .map(param -> parseDateTime(param))
+				  .orElseThrow(() -> invalidRequiredParameter(name));
     }
 	
 	public static LocalDateTime getQueryParamAsDateTime(ServerRequest req, String name) {
 		return req.queryParam(name)
-				  .map(param -> LocalDateTime.parse(param, DEFAULT_FORMATTER))
+				  .map(RequestParameterUtil::parseDateTime)
 				  .orElse(null);
 	}
 	
@@ -44,20 +46,32 @@ public class RequestParameterUtil {
 			if(isRequired)
 				result = req.queryParam(name)
 							.map(param -> Integer.parseInt(param))
-							.orElseThrow(() -> new IllegalArgumentException(name + " is required"));
+							.orElseThrow(() -> invalidRequiredParameter(name));
 			else 
 				result = req.queryParam(name)
 							.map(param -> Integer.parseInt(param))
 							.orElse(defaultVal);
 		} catch (Exception e) {
-			if(e instanceof IllegalArgumentException)
+			if(e instanceof BusinessException)
 				throw e;
 			
 			//파싱에러로 추정
 			//올바르지 않은 형식(숫자가 아닌 형식)으로 파라미터를 넘긴 경우 - 고의성이 있기 때문에 오류 처리
-			throw new IllegalArgumentException("wrong argument, " + name);
+			throw new BusinessException(BusinessErrorCode.INVALID_REQUEST_PARAMETER);
 		}
 		
 		return result < 0 ? defaultVal : result;
+	}
+
+	private static LocalDateTime parseDateTime(String value) {
+		try {
+			return LocalDateTime.parse(value, DEFAULT_FORMATTER);
+		} catch (RuntimeException e) {
+			throw new BusinessException(BusinessErrorCode.INVALID_REQUEST_PARAMETER);
+		}
+	}
+
+	private static BusinessException invalidRequiredParameter(String name) {
+		return new BusinessException(BusinessErrorCode.INVALID_REQUEST_PARAMETER, name + " is required");
 	}
 }
