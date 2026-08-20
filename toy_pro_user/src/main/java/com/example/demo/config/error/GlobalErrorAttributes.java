@@ -1,7 +1,5 @@
 package com.example.demo.config.error;
 
-import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.boot.web.error.ErrorAttributeOptions;
@@ -17,21 +15,18 @@ import com.example.demo.common.error.exception.HttpException;
 
 @Component
 public class GlobalErrorAttributes extends DefaultErrorAttributes {
+
+	private final ErrorResponseFactory errorResponseFactory;
+
+	public GlobalErrorAttributes(ErrorResponseFactory errorResponseFactory) {
+		this.errorResponseFactory = errorResponseFactory;
+	}
 	
 	@Override
 	public Map<String, Object> getErrorAttributes(ServerRequest request, ErrorAttributeOptions options) {
 		Throwable e = getError(request);
-		
-		Map<String, Object> attributes = new LinkedHashMap<>();
-		
 		ErrorCode errorCode = resolveErrorCode(e);
-		attributes.put("status", errorCode.getHttpStatus().value());
-		attributes.put("code", errorCode.getCode());
-		attributes.put("message", resolveMessage(e));
-		attributes.put("time", LocalDateTime.now().toString());
-		attributes.put("path", request.path());
-		
-		return attributes;
+		return errorResponseFactory.create(errorCode, resolveMessage(e), request.path());
 	}
 	
 	private ErrorCode resolveErrorCode(Throwable error) {

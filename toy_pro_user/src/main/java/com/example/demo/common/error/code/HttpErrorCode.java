@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum HttpErrorCode implements ErrorCode {
+	UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Authentication is required"),
+	FORBIDDEN(HttpStatus.FORBIDDEN, "FORBIDDEN", "Access is denied"),
 	INTERVAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "", "Interval Server Error")
 	;
 	

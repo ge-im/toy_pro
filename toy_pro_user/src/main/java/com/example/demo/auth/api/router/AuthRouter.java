@@ -1,5 +1,6 @@
 package com.example.demo.auth.api.router;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
@@ -10,7 +11,7 @@ import com.example.demo.auth.api.handler.AuthHandler;
 @Configuration
 public class AuthRouter {
 	
-	
+	@Bean
 	RouterFunction<ServerResponse> authRoutes(AuthHandler handler) {
 		return RouterFunctions.route()
 				.path("/auth", builder -> builder

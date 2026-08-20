@@ -28,7 +28,7 @@ jwt:
   secretKey: qw12ee23t04id993jdif994jdfnn2o39s00xodjh2939dhc8b94ighfsldkfjcmn92093ifji39
   expireTime: 
     accessMin: 30
-    refreshDate: 7
+    refreshDate: 14
 
 server:
   error:
