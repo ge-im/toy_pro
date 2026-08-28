@@ -22,9 +22,9 @@ DB는 다음과 같은 도메인 중심 구조로 구성되어 있습니다.
 
 - User / Role : 사용자 및 권한 관리
 - Post / Comment : 게시글 및 댓글
-- Like : 좋아요 상태 및 이력 관리
+- Like : 좋아요 Snapshot, 이벤트 이력 및 복구용 메타데이터 관리
 
-각 도메인은 Master / Relation / History 성격에 따라 테이블을 분리했습니다.
+각 도메인은 Master / Relation / History / Snapshot / Metadata 성격에 따라 테이블을 분리했습니다.
 
 ---
 
@@ -43,22 +43,20 @@ DB는 다음과 같은 도메인 중심 구조로 구성되어 있습니다.
 - 도메인별 책임 분리
 - 서비스 로직과 자연스러운 매핑
 
-<br/>
+### 3.2 Snapshot 데이터와 이력 데이터 분리
 
-### 3.2 상태 데이터와 이력 데이터 분리
-
-본 프로젝트에서는 상태(State)와 이력(History)을 분리하는 구조를 사용했습니다.
+본 프로젝트에서는 Snapshot 데이터와 이력(History)을 분리하는 구조를 사용했습니다.
 
 예시:
-- t_like_m01 : 현재 Like 상태
-- t_like_h01 : Like 이벤트 이력
+- t_like_snap01 : 특정 Snapshot version의 Redis Like 상태
+- t_like_h01 : 실제 Redis 상태 변경 Event 이력
+- t_like_snap_meta01 : Snapshot version 및 실행 상태 관리
 
 목적:
-- 현재 상태 조회 성능 최적화
-- 이벤트 흐름 추적 가능
-- 데이터 복구 및 분석 가능성 확보
-
-<br/>
+- Redis 실시간 상태와 DB 영속 데이터의 역할 분리
+- 장애 시 Snapshot + History 기반 복구 가능
+- 상태 변경 흐름 추적
+- Snapshot 생성 상태 및 version 관리
 
 ### 3.3 계층 구조 분리 (Role Hierarchy)
 
@@ -72,8 +70,6 @@ DB는 다음과 같은 도메인 중심 구조로 구성되어 있습니다.
 - 권한 확장성 확보
 - 상위 권한 → 하위 권한 구조 표현
 
-<br/>
-
 ### 3.4 N:M 관계 분리
 
 User와 Role 관계는 다대다(N:M) 구조이므로  
@@ -84,8 +80,6 @@ User와 Role 관계는 다대다(N:M) 구조이므로
 목적:
 - 유연한 권한 부여 구조
 - 확장 가능한 사용자-권한 매핑
-
-<br/>
 
 ### 3.5 Soft Delete 전략
 
@@ -99,12 +93,10 @@ User와 Role 관계는 다대다(N:M) 구조이므로
 - 데이터 복구 가능성 확보
 - 이력 관리와의 정합성 유지
 
-<br/>
-
 ### 3.6 애플리케이션 중심 제어
 
-본 프로젝트에서는 외래키(FK), Unique 제약 등을  
-논리적으로는 유지하지만, 물리적으로는 최소화했습니다.
+본 프로젝트에서는 외래키(FK), Unique 제약 등을 논리적으로는 유지하지만, 물리적으로는 최소화했습니다. 
+(+) 분산 처리/재처리 과정에서 데이터 정합성을 보장하기 위해 필요한 기술적 제약은 선택적으로 적용합니다.
 
 목적:
 - 개발 유연성 확보
@@ -129,16 +121,57 @@ Like는 게시글(Post), 댓글(Comment) 모두에 적용되므로
 - 테이블 분리 없이 확장 가능
 - 구조 단순화
 
-<br/>
+### 4.2 Snapshot + Event History 구조
 
-### 4.2 상태 + 이벤트 구조
-
-- 현재 상태 : t_like_m01
-- 이벤트 로그 : t_like_h01
+- 실시간 상태 : Redis Set
+- 복구용 Snapshot : t_like_snap01
+- 이벤트 이력 : t_like_h01
+- Snapshot 실행 메타데이터 : t_like_snap_meta01
 
 목적:
-- 현재 상태 조회 최적화
-- 이벤트 기반 확장 가능성 확보
+- 실시간 상태와 복구용 영속 데이터 분리
+- Redis 장애 시 Snapshot + History 기반 재구성
+- Snapshot version별 상태 관리
+- Retry 및 Recovery 확장 가능성 확보
+
+### 4.3 Like History 식별자 및 시간 정보
+
+```
+t_like_h01
+- event_id
+- event_dt
+- reg_dt
+- ...
+```
+
+역할:
+```
+event_id
+→ 실제 Like 상태 변경 Event 식별자
+→ Retry 멱등성 보장
+→ UNIQUE 적용
+
+event_dt
+→ Redis에서 실제 상태 변경이 발생한 시각
+
+reg_dt
+→ History가 DB에 등록된 시각
+```
+
+### 4.4 Snapshot Version / Metadata
+
+```
+t_like_snap_meta01
+- version
+- status
+- ...
+```
+
+- status :**RUNNING / COMPLETE / FAILED**
+- snapshot_version은 DB Sequence 기반 발급
+- COMPLETE version만 복구 데이터로 사용
+- FAILED/RUNNING의 부분 Snapshot 데이터는 cleanup 대상
+
 
 ---
 
@@ -168,7 +201,8 @@ ADMIN → USER
 본 DB 구조는 다음을 목표로 설계되었습니다.
 
 - 단순 CRUD를 넘는 구조적 설계 경험 확보
-- 상태 데이터와 이벤트 데이터 분리
+- 실시간 상태와 복구용 Snapshot/History 데이터의 역할 분리
+- 장애 복구와 재처리를 고려한 데이터 모델 설계
 - 확장 가능한 권한 및 관계 구조 설계
 - 애플리케이션 중심 데이터 제어
 
@@ -178,5 +212,7 @@ ADMIN → USER
 
 - 물리적 제약 조건(FK, Index) 재정비
 - 대용량 데이터 대응을 위한 파티셔닝 전략
-- 이벤트 기반 아키텍처 전환 고려
+- History 기반 Incremental Snapshot 방식 검토
+- 이벤트 기반 아키텍처 / 외부 Message Broker 전환 고려
+- 정합성 검증 및 부분 복구 기능 확장
 - CQRS 구조 적용 검토

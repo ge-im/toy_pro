@@ -55,11 +55,22 @@ CREATE TABLE dev_toy_schema01.t_comment_m01 (
 	, updt_dt TIMESTAMP 
 );
 
-CREATE TABLE dev_toy_schema01.t_like_m01 (
+CREATE TABLE dev_toy_schema01.t_like_snap01 (
 	sn SERIAL NOT NULL PRIMARY KEY
+	, version INTEGER NOT NULL 
 	, target_type CHAR(1) --P:(POST), C(COMMENT)
 	, target_sn INTEGER --POST_SN, COMMENT_SN
 	, user_sn INTEGER
+	, reg_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
+);
+
+CREATE TABLE dev_toy_schema01.t_like_snap_meta01 (
+	version SERIAL NOT NULL PRIMARY KEY
+	, status VARCHAR(20)
+	, started_at TIMESTAMP
+	, completed_at TIMESTAMP
+	, error_cd VARCHAR(255)
+	, error_msg VARCHAR(255)
 	, reg_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
 );
 
@@ -69,6 +80,8 @@ CREATE TABLE dev_toy_schema01.t_like_h01 (
 	, target_sn INTEGER --POST_SN, COMMENT_SN
 	, user_sn INTEGER
 	, action_type CHAR(1) --A(add: 좋아요), D:(delete: 좋아요 취소-물리삭제)
+	, event_id VARCHAR(255)
+	, event_dt TIMESTAMP
 	, reg_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
