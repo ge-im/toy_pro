@@ -16,17 +16,17 @@ import com.example.demo.common.error.exception.HttpException;
 @Component
 public class GlobalErrorAttributes extends DefaultErrorAttributes {
 
-	private final ErrorResponseFactory errorResponseFactory;
+	private final GlobalErrorResponseFactory globalErrorResponseFactory;
 
-	public GlobalErrorAttributes(ErrorResponseFactory errorResponseFactory) {
-		this.errorResponseFactory = errorResponseFactory;
+	public GlobalErrorAttributes(GlobalErrorResponseFactory globalErrorResponseFactory) {
+		this.globalErrorResponseFactory = globalErrorResponseFactory;
 	}
 	
 	@Override
 	public Map<String, Object> getErrorAttributes(ServerRequest request, ErrorAttributeOptions options) {
 		Throwable e = getError(request);
 		ErrorCode errorCode = resolveErrorCode(e);
-		return errorResponseFactory.create(errorCode, resolveMessage(e), request.path()).toAttributes();
+		return globalErrorResponseFactory.create(errorCode, resolveMessage(e), request.path()).toAttributes();
 	}
 	
 	private ErrorCode resolveErrorCode(Throwable error) {
