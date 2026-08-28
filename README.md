@@ -53,7 +53,6 @@ Java/Spring Framework 실무 경험 이후, Spring WebFlux 기반의 비동기 �
 - Session을 사용하지 않는 JWT 인증 구조
 - Access / Refresh Token 역할 분리
 - Role Hierarchy 기반 권한 확장
-- Redis 기반 Token Lifecycle 관리
 
 ### 3.5 Error Handling 표준화
 
@@ -74,7 +73,7 @@ Java/Spring Framework 실무 경험 이후, Spring WebFlux 기반의 비동기 �
 
 ## 4. 프로젝트 구조
 
-```
+```text
 Domain Applications
 - user: 사용자 도메인  
 - post : 게시글 도메인  
@@ -82,12 +81,12 @@ Domain Applications
 - like : 좋아요 도메인 
 
 Supporting Applications
-- scheduler [planed]
-- recovery [planed]
+- scheduler [planned]
+- recovery [planned]
 ```
 
 각 애플리케이션 내부:
-```
+```text
 common : 공통 코드 (Error, Util 등)  
 config : 설정 (Security, Redis, WebFlux 등)  
 infra : 외부 시스템 연동 (Redis 등) 
@@ -116,7 +115,7 @@ infra : 외부 시스템 연동 (Redis 등)
 - PostgreSQL
 - Redis
 
-```
+```text
 PostgreSQL 데이터베이스 생성
 (db_init.sql, db_architech.sql, db_data_init.sql) 
 → Redis 서버 실행 

@@ -54,18 +54,6 @@ Authentication 영역의 구조는 __Security__ 문서에서 별도로 설명합
 ---
 
 ## 4. History-Snapshot-Recovery 전략
-### 현재 구조
-
-현재는 Redis 기반 캐시 구조만 적용되어 있으며,
-DB와의 동기화 Batch는 아직 구현되지 않았습니다.
-
-### 계획된 구조
-
-Redis에 반영된 Like 상태를 DB에 최종 반영하기 위해
-Scheduler 기반 Batch 동기화 구조를 적용할 예정입니다.
-
-- Scheduler 기반 주기적 동기화
-- Batch 단위 DB 반영
 
 ### 4.1 Like 상태 변경과 History 기록
 
@@ -95,7 +83,7 @@ History 실패
 - 5회 실패 시 DLQ
 - DLQ 이후 운영자 확인
 
-자세한 구조와 설명은 [like-history-retry-strategy](./docs/feature_like/like-history-retry-strategy.md) 파일 참조
+자세한 구조와 설명은 [like-history-retry-strategy](./feature_like/like-history-retry-strategy.md) 파일 참조
 
 ### 4.3 Snapshot 생성 전략
 
