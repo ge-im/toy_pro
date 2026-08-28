@@ -2,7 +2,8 @@
 
 ## 1. 프로젝트 개요
 
-본 프로젝트는 WebFlux 기반으로 사용자(User), 게시글(Post), 댓글(Comment), 좋아요(Like) 기능을 각각 독립적인 서비스 형태로 구현한 토이 프로젝트입니다.
+본 프로젝트는 WebFlux 기반으로 각 도메인을 독립적인 Spring Boot 애플리케이션/프로젝트 단위로 분리해 구현하고,
+MSA 확장을 고려해 구조를 설계한 토이 프로젝트입니다.
 
 단순 CRUD 기능 구현과 WebFlux 및 Security(Filter 기반 인증 구조)를 중심으로 개발 경험을 쌓는 것을 주요 목표로 기능 단위 개발을 진행하면서,   
 추후 기능 확장이나 공통 기능 정리를 고려하여 
@@ -11,12 +12,16 @@
 특히 Like 기능 개발 시점에서 Redis 연동과 함께 전체 구조를 한 번 정리하게 되었고,
 이후 프로젝트에서도 이 구조를 기준으로 점진적으로 맞춰가고 있습니다.
 
+추가로 Like 기능의 데이터 복구 및 주기 작업은
+Scheduler Service와 Recovery Service로 별도 분리하는 방향으로 확장하고 있습니다.
+
 ---
 
 ## 2. 개발 및 구조 개선 흐름
 
 ```
 User → Post → Comment → Like -> User(Authentication/Authorization)
+ -> Like + Scheduler + Recovery
 ```
 
 User
@@ -38,6 +43,11 @@ Like
 - Domain / Infra 분리 구조 정리
 - 공통 Exception / ErrorCode 구조 정리
 - Reactive Redis Executor 분리
+- (+) Redis 기반 실시간 상태 관리
+- (+) History 저장 및 Retry Stream 설계
+- (+) Snapshot / Cleanup Scheduler 설계
+- (+) Redis 전체 복구용 Recovery Service 분리
+- (+) Domain / Infra 분리 구조 정리
 
 <br/>
 
@@ -63,6 +73,8 @@ Domain Layer (Model / Repository) : Entity 및 Repository 인터페이스 정의
 ↓
 Infra Layer (Redis, External Config) : DB, Redis 등 외부 시스템 연동
 ```
+본 구조는 각 도메인/기능별 Spring Boot 애플리케이션 내부의 기본 계층 구조이며,
+프로젝트 전체는 Like, Scheduler, Recovery 등의 독립 애플리케이션으로 확장됩니다.
 
 ### 3.2 Domain 중심 패키지 구성
 ```
@@ -171,7 +183,7 @@ SecurityContext에 저장된 사용자 정보를 기반으로 수행됩니다.
 
 현재 Redis는 도메인별 역할에 따라 분리하여 사용하고 있습니다.
 
-- Like 서비스 : 현재 상태 조회를 위한 캐시 (Set 기반 구조)
+- Like 서비스 : 실시간 Like 상태 관리
 - Auth 서비스 : 인증 상태 관리 (Token Lifecycle 관리)
 
 각 도메인의 Redis 사용 목적이 다르기 때문에
@@ -181,13 +193,19 @@ SecurityContext에 저장된 사용자 정보를 기반으로 수행됩니다.
 
 ### 5.1 Like 서비스
 
-Like 서비스에서는 Redis를 다음 목적으로 사용했습니다.
-- 좋아요 현재 상태 캐싱
-- 빠른 상태 조회 처리
+Like 서비스에서는 Redis Set을 실시간 Like 현재 상태 저장소로 사용합니다.
 
-Like 이벤트 히스토리는 DB에 저장하며, Redis는 현재 상태 조회 성능 개선을 위한 용도로 사용했습니다.  
-Redis 장애 또는 데이터 유실 상황을 대비하여,
-최종 데이터 기준은 DB를 기준으로 설계했습니다.
+- Like / Unlike 상태 변경
+- 현재 Like 여부 조회
+- Like Count 조회
+
+실제 상태 변경 이력은 t_like_h01에 저장하며,
+History 저장 실패 이벤트는 Redis Stream을 통해 재처리합니다.
+
+Redis 전체 유실에 대비해
+Scheduler Service가 주기적으로 version 기반 Snapshot을 생성하며,
+Recovery Service는 최신 COMPLETE Snapshot과 이후 History를 이용해
+Redis Like 상태를 재구성합니다.
 
 Like 데이터는 현재 상태를 나타내는 정보이므로 TTL을 설정하지 않고,
 Redis 데이터가 곧 현재 상태가 되도록 설계했습니다.
@@ -205,7 +223,6 @@ Token의 남은 유효시간과 동일하게 Redis TTL을 설정합니다.
 이를 통해 별도의 정리 작업 없이도
 Token 만료 시 자동으로 Redis 데이터가 제거되도록 설계했습니다.
 
-
 ---
 
 ## 6. 현재 상태와 개선 방향
@@ -214,16 +231,19 @@ Like 서비스는 프로젝트 중 가장 마지막에 개발된 기능으로,
 이전 도메인에서 겪었던 구조적인 고민들을 반영하여
 가장 정리된 형태로 구성되어 있습니다.
 
+Like 도메인을 중심으로 Scheduler/Recovery 기능까지 확장하면서
+저장소 역할과 서비스 책임을 구체화했다.
+
 현재 기존 User / Post / Comment 서비스는 점진적으로 구조를 맞춰갈 예정입니다.
 
 추가 개선 사항  :
-- Spring Cloud 기반 서비스 분리(학습 및 실험 목적)
-- 이벤트 기반 구조 도입
+- Spring Cloud / Gateway 기반 서비스 연계(학습 및 실험 목적)
+- 공통 Security 모듈화 또는 Gateway 인증 확장
+- Kafka / RabbitMQ 기반 메시지 브로커 전환
 - Redis Pub/Sub을 활용한 알림 기능
-- Docker 기반 실행 환경 정리
-
-<br/>
-
+- Redis persistence / replica 구성
+- Docker 기반 전체 실행 환경 정리
+  
 본 프로젝트는 처음부터 완벽한 구조 설계를 목표로 하기보다,   
 기능 구현 → 구조 개선 → 공통화 과정으로 발전해온 프로젝트입니다.  
 기능 완성보다는 구조를 이해하고 개선해 나가는 과정에 중점을 두고 있습니다.
@@ -238,10 +258,13 @@ Like 서비스는 프로젝트 중 가장 마지막에 개발된 기능으로,
 - Redis 연동 및 Key 설계 경험
 - 공통 Exception 구조 설계 경험
 - Infra / Domain 분리 기준 정리 경험
-
-<br/>
+- Redis와 DB 간 Dual Write 실패 대응 설계 경험
+- Redis Stream 기반 Retry / DLQ 설계 경험
+- version 기반 Snapshot 및 Cleanup 구조 설계 경험
+- 장애 복구용 Recovery Service 책임 분리 경험
+  
 
 느낀 점 :
 - 구조가 정리되어 있을수록 기능 추가가 수월함
 - 공통 코드가 많아질수록 관리가 어려워짐
-- 외부 시스템은 최대한 한 곳에서 관리하는 것이 좋음
+- 외부 시스템 접근 책임과 비즈니스 책임을 분리할수록 구조 변경 영향 범위를 줄일 수 있음

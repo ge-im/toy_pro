@@ -52,7 +52,8 @@ Handler (비즈니스 로직)
 
 ### 3.1 JWT 기반 인증
 
-본 프로젝트는 Stateless 인증 방식을 위해 JWT를 사용합니다.
+본 프로젝트는 Session을 사용하지 않는 JWT 기반 인증 방식을 적용하고,
+Refresh Token 및 Access Token Blacklist는 Redis에서 상태를 관리합니다.
 
 구성 요소:
 
@@ -60,8 +61,6 @@ Handler (비즈니스 로직)
 - Refresh Token
 
 Access Token은 요청 인증에 사용되며, Refresh Token은 Access Token 재발급에 사용됩니다.
-
-<br/>
 
 ### 3.2 JwtAuthenticationWebFilter
 
@@ -85,8 +84,6 @@ JwtAuthenticationWebFilter는 이러한 구조에서
 인증의 시작 지점 역할을 수행하며,
 모든 요청에 대해 공통 인증 로직을 적용할 수 있도록 합니다.
 
-<br/>
-
 ### 3.3 ReactiveAuthenticationManager
 
 - JWT 검증 (서명, 만료시간)
@@ -107,8 +104,6 @@ JwtAuthenticationWebFilter가 Token을 추출하는 역할이라면, Authenticat
 
 이처럼 인증 관련 검증 로직을 한 곳에 집중시킴으로써 Filter와 인증 로직의 책임을 분리하고, 유지보수성을 높이도록 설계했습니다.
 
-<br/>
-
 ### 3.4 SecurityContext 저장
 
 인증 성공 시 Authentication 객체를 생성하여 SecurityContext에 저장합니다.
@@ -121,8 +116,10 @@ JwtAuthenticationWebFilter가 Token을 추출하는 역할이라면, Authenticat
 
 인가 처리는 인증 이후 수행됩니다.
 
-- 사용자 권한(Role) 기반 접근 제어
-- 요청 API별 권한 검증
+- Role Hierarchy 적용
+- 하위 권한을 상위 권한이 포함하도록 처리
+- 권한 계층은 DB의 t_role_hierarchy_s01 기준
+- Recursive CTE를 통해 상위 권한 관계 조회
 
 권한 검증 실패 시 403 응답 반환
 
@@ -133,27 +130,26 @@ JwtAuthenticationWebFilter가 Token을 추출하는 역할이라면, Authenticat
 ### 5.1 Access Token
 
 - 짧은 만료 시간 (30 min) 사용
-- Stateless 유지
-
-<br/>
+- 요청 인증 시 서버 Session을 사용하지 않음
+- Logout 이후에는 Redis Blacklist를 통해 상태 제어
 
 ### 5.2 Refresh Token
 
-- Redis에 저장
-- 사용자 로그인 상태 유지 (14 days)
+- Refresh Token은 Redis에 저장
+- Refresh Token에는 Role 정보를 포함하지 않음
+- Access Token 재발급 시 현재 사용자 권한을 기준으로 새 Access Token 생성
+- 재발급 시 기존 Refresh Token 제거 후 새 Refresh Token 발급
 
-<br/>
 
 ### 5.3 Access Token Blacklist
 
-로그아웃 시 Access Token을 Redis Blacklist에 저장합니다.
+로그아웃 시 Access Token을 Redis Blacklist에 저장하고,
+Refresh Token은 삭제합니다.
 
 - Key: auth:blacklist:access:{jti}
 - TTL: Access Token 남은 만료 시간
 
 이를 통해 이미 발급된 Token이라도 강제로 인증을 무효화할 수 있습니다.
-
-<br/>
 
 ### 5.4 Token 전략 설계 이유
 
@@ -161,15 +157,18 @@ Access Token과 Refresh Token을 분리한 이유는 다음과 같습니다.
 
 - Access Token
   - 짧은 만료 시간을 통해 보안성 강화
-  - Stateless 인증 유지
+  - 사용자 식별 정보 + Role 포함
 
 - Refresh Token
   - 장기 인증 상태 유지
   - 재로그인 없이 Access Token 재발급 가능
+  - Role 정보 미포함
 
 또한 로그아웃 시 Access Token을 즉시 무효화하기 위해 Redis Blacklist 방식을 사용했습니다.
 
-이를 통해 Stateless 구조를 유지하면서도 강제 로그아웃 및 토큰 제어가 가능하도록 설계했습니다.
+Session 기반 인증을 사용하지 않으면서도,
+Redis를 통해 Refresh Token과 Access Token 무효화 상태를 관리하여
+강제 로그아웃 및 재발급 제어가 가능하도록 설계했습니다.
 
 ---
 
@@ -179,6 +178,7 @@ Auth 영역에서 Redis는 다음 용도로 사용됩니다.
 
 - Refresh Token 저장
 - Access Token Blacklist 관리
+- Refresh Token 재발급/Rotation 상태 관리
 
 모든 Token 데이터는 TTL 기반으로 관리되며, Token 만료 시 자동 삭제됩니다.
 
@@ -189,23 +189,28 @@ Auth 영역에서 Redis는 다음 용도로 사용됩니다.
 - 인증 실패 → 401 (Unauthorized)
 - 인가 실패 → 403 (Forbidden)
 
-Security Filter 단계에서 1차 처리되며,
-응답 형식은 Global Error Handler 기준에 맞춰 통일됩니다.
+Security Filter 단계의 인증/인가 오류는
+SecurityErrorResponseWriter를 통해 응답하며,
+ErrorResponseFactory를 사용해
+일반 API 오류(Global Error Handler)와 동일한 ErrorResponseDTO 형식을 생성합니다.
 
 ---
 
 ## 8. 설계 의도
 
 - 인증 로직과 비즈니스 로직 분리
-- Stateless 기반 확장성 확보
-- Redis를 활용한 인증 상태 제어
-- WebFlux 환경에 맞는 비동기 인증 처리 구조
+- Session 비사용 JWT 인증 구조
+- Redis 기반 Token 상태 제어
+- 인증 로직과 비즈니스 로직 분리
+- WebFlux 비동기 인증
 
 ---
 
 ## 9. 향후 개선 방향
 
+- 공통 Security 모듈화
 - OAuth2 로그인 연동
-- 토큰 재발급 정책 고도화
+- Refresh Token 재사용 탐지/보안 강화
 - Redis 장애 대응 전략 추가
 - 인증/인가 MSA 분리
+- Gateway 기반 인증/인가 적용

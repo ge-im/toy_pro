@@ -17,6 +17,7 @@ Security 인증/인가 과정에서 발생하는 예외에 대한 전역 기준�
 그래서 현재는
 - ErrorCode Enum 중심 구조
 - WebFlux 전역 Error Handler 구조
+- 일반 API와 Security 영역의 Error Response 형식 통일
 
 로 정리했습니다.
 
@@ -27,18 +28,25 @@ Security 인증/인가 과정에서 발생하는 예외에 대한 전역 기준�
 현재 Error Handling 구조는 다음 기준으로 구성했습니다.
 
 ```
+common.dto
+ └ ErrorResponseDTO
+
 common.error
  ├ code
  │  ├ ErrorCode
  │  ├ BusinessErrorCode     (Business + Security)
  │  └ HttpErrorCode         (Http)
- ├ exception
- │  ├ BusinessException
- │  └ HttpException
+ └ exception
+    ├ BusinessException
+    └ HttpException
 
 config.error
+ ├ GlobalErrorResponseFactory
  ├ GlobalErrorAttributes
  └ GlobalErrorExceptionHandler
+
+config.security
+ └ SecurityErrorResponseWriter
 ```
 
 ---
@@ -54,7 +62,8 @@ Custom Exception 여러 개 생성
 
 현재:
 ```
-ErrorCode Enum → Exception → Global Handler → Response(Map) 생성
+ErrorCode Enum → Exception → Global Handler → GlobalErrorResponseFactory
+→ ErrorResponseDTO → Response 생성
 ```
 
 변경 목적:
@@ -102,18 +111,25 @@ WebFlux 환경에서는 기존 @ExceptionHandler 대신
 다음 구조를 사용했습니다.
 ```
 GlobalErrorAttributes
+GlobalErrorResponseFactory
 GlobalErrorExceptionHandler
 ```
 
 ### 5.1 GlobalErrorAttributes 역할
 
-- Exception → Error Response 데이터 변환
-- ErrorCode 기반 Response 구성
+- 발생 Exception 분석
+- ErrorCode / status / 요청 정보 추출
+- WebFlux ErrorAttributes 역할 수행
 
-### 5.2 GlobalErrorExceptionHandler 역할
+### 5.2 GlobalErrorResponseFactory 역할
 
-- WebFlux 전역 에러 처리
-- Response 생성 및 반환
+- ErrorCode와 요청 정보를 기반으로 ErrorResponseDTO 생성
+- 일반 API / Security Error에서 공통 사용
+
+### 5.3 GlobalErrorExceptionHandler 역할
+
+- WebFlux 전역 예외 처리
+- ErrorResponseDTO 기반 응답 직렬화 및 반환
 
 ---
 
@@ -123,6 +139,8 @@ GlobalErrorExceptionHandler
 
 예시:
 ```
+응답 모델 객체 class : ErrorResponseDTO
+
 {
   "code": "LIKE_ALREADY_EXISTS",
   "message": "Like already exists",
@@ -133,8 +151,9 @@ GlobalErrorExceptionHandler
 ```
 
 목적:
+- 일반 API / Security Error 동일 포맷
 - 클라이언트 처리 단순화
-- 추후 MSA 시스템간 에러 코드 공유
+- 서비스 간 공통 규격 유지
 - 로그 추적 용이성
 - 운영 대응 속도 개선
 
@@ -150,7 +169,7 @@ Security 관련 에러는 다음 기준으로 처리합니다.
 WebFlux Security 환경에서는 인증/인가 과정이
 Controller 이전 단계인 Security Filter Chain에서 수행됩니다.
 
-따라서 Security 영역에서 1차적으로 예외를 처리하고,
+따라서 별도 Security 처리 흐름에서 동일한 Factory/DTO를 재사용해,
 최종적으로는 Global Error Handler와 동일한 응답 구조를 유지하도록 설계했습니다.
 
 ---
@@ -178,7 +197,13 @@ Authentication 실패
 ↓
 AuthenticationEntryPoint
 ↓
-Error Response 생성
+SecurityErrorResponseWriter
+↓
+ErrorResponseFactory
+↓
+ErrorResponseDTO
+↓
+401 Response
 ```
 
 인증 실패의 경우 401 상태 코드가 반환됩니다.
@@ -196,16 +221,26 @@ AccessDeniedException
 ↓
 AccessDeniedHandler
 ↓
-403 Response 반환
+SecurityErrorResponseWriter
+↓
+ErrorResponseFactory
+↓
+ErrorResponseDTO
+↓
+403 Response
 ```
 
 인가 실패의 경우 403 상태 코드가 반환됩니다.
 
 ### Global Error Handler와의 관계
 
-Security Filter 단계에서 처리되지 않은 예외는 기존 WebFlux Global Error Handler로 전달되어 일반 Exception과 동일한 응답 포맷으로 변환됩니다.
+Security Filter Chain에서 발생하는 인증/인가 오류는
+SecurityErrorResponseWriter에서 직접 응답합니다.
 
-이를 통해 시스템 전체에서 동일한 Error Response 구조를 유지할 수 있습니다.
+일반 애플리케이션 예외는 Global Error Handler에서 처리합니다.
+
+두 흐름은 ErrorResponseFactory와 ErrorResponseDTO를 공통 사용하여
+동일한 Error Response 형식을 유지합니다.
 
 ---
 
@@ -217,6 +252,7 @@ Security Filter 단계에서 처리되지 않은 예외는 기존 WebFlux Global
 - ErrorCode 기준으로 에러 관리
 - WebFlux 환경과 자연스럽게 연결
 - 서비스 간 에러 처리 방식 통일
+- Security Filter 단계와 일반 API Error Response 형식 통일
 
 ---
 
@@ -225,7 +261,7 @@ Security Filter 단계에서 처리되지 않은 예외는 기존 WebFlux Global
 - ErrorCode 기준이 있으면 기능 개발이 편해짐
 - Exception 클래스는 최소한으로 유지하는 것이 좋음
 - 전역 Error Handler는 초기에 잡는 것이 좋음
-- Security Error는 일반 Exception과 다르게 접근해야 함
+- Security Error는 일반 Exception과 다르게 접근하되, 응답 모델 공통화 가능
 
 ---
 
