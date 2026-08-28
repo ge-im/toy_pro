@@ -9,7 +9,7 @@ import com.example.demo.common.error.code.ErrorCode;
  * Builds the application's common error response body.
  */
 @Component
-public class ErrorResponseFactory {
+public class GlobalErrorResponseFactory {
 
 	public ErrorResponseDTO create(ErrorCode errorCode, String message, String path) {
 		return new ErrorResponseDTO(

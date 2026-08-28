@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 
 import com.example.demo.common.error.code.ErrorCode;
-import com.example.demo.config.error.ErrorResponseFactory;
+import com.example.demo.config.error.GlobalErrorResponseFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono;
 public class SecurityErrorResponseWriter {
 
 	private final ObjectMapper objectMapper;
-	private final ErrorResponseFactory errorResponseFactory;
+	private final GlobalErrorResponseFactory errorResponseFactory;
 
 	public Mono<Void> write(ServerWebExchange exchange, ErrorCode errorCode) {
 		ServerHttpResponse response = exchange.getResponse();
