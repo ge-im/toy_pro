@@ -193,22 +193,15 @@ SecurityContext에 저장된 사용자 정보를 기반으로 수행됩니다.
 
 ### 5.1 Like 서비스
 
-Like 서비스에서는 Redis Set을 실시간 Like 현재 상태 저장소로 사용합니다.
+Like 서비스에서는 Redis Set을 실시간 Like 상태 저장소로 사용합니다.
 
 - Like / Unlike 상태 변경
 - 현재 Like 여부 조회
 - Like Count 조회
+- TTL 미설정
 
-실제 상태 변경 이력은 t_like_h01에 저장하며,
-History 저장 실패 이벤트는 Redis Stream을 통해 재처리합니다.
-
-Redis 전체 유실에 대비해
-Scheduler Service가 주기적으로 version 기반 Snapshot을 생성하며,
-Recovery Service는 최신 COMPLETE Snapshot과 이후 History를 이용해
-Redis Like 상태를 재구성합니다.
-
-Like 데이터는 현재 상태를 나타내는 정보이므로 TTL을 설정하지 않고,
-Redis 데이터가 곧 현재 상태가 되도록 설계했습니다.
+상세한 History / Snapshot / Recovery 구조는
+[Redis Like Design](./redis-like-design.md) 문서에서 별도로 설명합니다.
 
 ### 5.2 Auth 서비스
 

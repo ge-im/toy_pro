@@ -57,31 +57,31 @@ CREATE TABLE dev_toy_schema01.t_comment_m01 (
 
 CREATE TABLE dev_toy_schema01.t_like_snap01 (
 	sn SERIAL NOT NULL PRIMARY KEY
-	, version INTEGER NOT NULL 
-	, target_type CHAR(1) --P:(POST), C(COMMENT)
-	, target_sn INTEGER --POST_SN, COMMENT_SN
-	, user_sn INTEGER
+	, snapshot_version INTEGER NOT NULL 
+	, target_type CHAR(1) NOT NULL --P:(POST), C(COMMENT)
+	, target_sn INTEGER NOT NULL --POST_SN, COMMENT_SN
+	, user_sn INTEGER NOT NULL
 	, reg_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
 );
 
 CREATE TABLE dev_toy_schema01.t_like_snap_meta01 (
-	version SERIAL NOT NULL PRIMARY KEY
-	, status VARCHAR(20)
-	, started_at TIMESTAMP
+	snapshot_version SERIAL NOT NULL PRIMARY KEY
+	, status VARCHAR(20) NOT NULL
+	, started_at TIMESTAMP NOT NULL
 	, completed_at TIMESTAMP
-	, error_cd VARCHAR(255)
-	, error_msg VARCHAR(255)
+	, error_cd VARCHAR(50)
+	, error_msg TEXT
 	, reg_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
 );
 
 CREATE TABLE dev_toy_schema01.t_like_h01 (
 	sn SERIAL NOT NULL PRIMARY KEY
-	, target_type CHAR(1) --P:(POST), C(COMMENT)
-	, target_sn INTEGER --POST_SN, COMMENT_SN
-	, user_sn INTEGER
-	, action_type CHAR(1) --A(add: 좋아요), D:(delete: 좋아요 취소-물리삭제)
-	, event_id VARCHAR(255)
-	, event_dt TIMESTAMP
+	, target_type CHAR(1) NOT NULL --P:(POST), C(COMMENT)
+	, target_sn INTEGER NOT NULL --POST_SN, COMMENT_SN
+	, user_sn INTEGER NOT NULL
+	, action_type CHAR(1) NOT NULL --A(add: 좋아요), D:(delete: 좋아요 취소-물리삭제)
+	, event_id VARCHAR(255) NOT NULL UNIQUE
+	, event_dt TIMESTAMP NOT NULL
 	, reg_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
