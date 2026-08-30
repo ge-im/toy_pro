@@ -162,14 +162,14 @@ reg_dt
 
 ```
 t_like_snap_meta01
-- version
+- snapshot_version
 - status
 - ...
 ```
 
 - status :**RUNNING / COMPLETE / FAILED**
 - snapshot_version은 DB Sequence 기반 발급
-- COMPLETE version만 복구 데이터로 사용
+- COMPLETE snapshot_version만 복구 데이터로 사용
 - FAILED/RUNNING의 부분 Snapshot 데이터는 cleanup 대상
 
 

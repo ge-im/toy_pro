@@ -199,7 +199,7 @@ AuthenticationEntryPoint
 ↓
 SecurityErrorResponseWriter
 ↓
-ErrorResponseFactory
+GlobalErrorResponseFactory
 ↓
 ErrorResponseDTO
 ↓
@@ -223,7 +223,7 @@ AccessDeniedHandler
 ↓
 SecurityErrorResponseWriter
 ↓
-ErrorResponseFactory
+GlobalErrorResponseFactory
 ↓
 ErrorResponseDTO
 ↓
@@ -239,7 +239,7 @@ SecurityErrorResponseWriter에서 직접 응답합니다.
 
 일반 애플리케이션 예외는 Global Error Handler에서 처리합니다.
 
-두 흐름은 ErrorResponseFactory와 ErrorResponseDTO를 공통 사용하여
+두 흐름은 GlobalErrorResponseFactory ErrorResponseDTO를 공통 사용하여
 동일한 Error Response 형식을 유지합니다.
 
 ---

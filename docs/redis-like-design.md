@@ -10,11 +10,11 @@
 - Redis와 DB의 역할을 분리
 
 이러한 특성을 고려하여,
-Like 서비스에서는 DB 단독 처리 구조가 아닌 Redis 실시간 Like 상태 저장소 역할를 적용했습니다.  
+Like 서비스에서는 DB 단독 처리 구조가 아닌 Redis를 실시간 Like 상태 저장소로 사용했습니다.  
 또한 추가로 Authentication 영역에서도 Redis를 Token Blacklist 관리 용도로 사용하고 있습니다.  
 
 해당 문서는 Like 기능 영역의 Redis 설계 설명을 중심으로 작성되었습니다.  
-Authentication 영역에서도 Redis를 사용되어 간략한 설명이 추가되나, 자세한 내용은 Security 문서에서 별도로 설명합니다.
+Authentication 영역에서도 Redis를 사용하고 있어 간략한 설명이 추가되나, 자세한 내용은 Security 문서에서 별도로 설명합니다.
 
 ---
 
@@ -166,21 +166,21 @@ Like 기능에서는 Redis **Set** 자료구조를 사용합니다.
 
 Key 구조:
 ```
-like:{targetType}:{postSn}
+like:{targetType}:{targetSn}
 ```
 
 예시:
 ```
-like:post:100
+like:P:100  (P: post, C: comment)
 ```
 
 Set 내부에는 해당 게시글에 Like를 누른 **사용자 식별자(userSn)** 가 저장됩니다.
 
 예시:
 ```
-SADD like:post:100 23
-SADD like:post:100 45
-SADD like:post:100 78
+SADD like:P:100 23  (P: post, C: comment)
+SADD like:P:100 45  (P: post, C: comment)
+SADD like:P:100 78  (P: post, C: comment)
 ```
 
 ### 6.2 사용자 Like 여부 조회
@@ -190,7 +190,7 @@ Redis `SISMEMBER` 명령을 사용합니다.
 
 예시:
 ```
-SISMEMBER like:post:100 23
+SISMEMBER like:P:100 23  (P: post, C: comment)
 ```
 
 해당 명령을 통해 **O(1) 시간 복잡도로 Like 여부를 확인**할 수 있습니다.
@@ -202,7 +202,7 @@ Redis Set의 Size를 사용하여 계산합니다.
 
 예시:
 ```
-SCARD like:post:100
+SCARD like:P:100  (P: post, C: comment)
 ```
 
 이를 통해 별도의 Count Key를 관리하지 않아도 되며,
@@ -228,7 +228,7 @@ Key 이름만으로도 데이터 의미를 파악할 수 있도록 설계했습�
 
 예시:
 ```
-like:{targetType}:{postSn}
+like:{targetType}:{targetSn}
 ```
 
 - **확장 가능성 고려**
@@ -238,8 +238,8 @@ like:{targetType}:{postSn}
 
 예시:
 ```
-like:post:100
-like:comment:55
+like:P:100  (P: post, C: comment)
+like:C:55  (P: post, C: comment)
 ```
 
 이를 통해 게시글뿐 아니라 댓글, 기타 콘텐츠 등 다양한 도메인 객체에
@@ -292,7 +292,6 @@ infra
 
 - Infra (Redis)
     - Redis 설정 및 실행 책임
-    - Scheduler 기반 동기화 처리
     - Redis 접근 로직 공통화
 
 (추가) 도메인 설명:
@@ -313,8 +312,6 @@ Recovery Service
 - 전체 Redis Like Recovery
 ```
 
-Redis 장애 대응이나 데이터 복구를 위한 Fallback 로직은
-Like 서비스 내부에서 필요 시 호출하는 보조 기능으로 두며,
 기존 비즈니스 흐름을 침범하지 않도록 설계했습니다.
 
 ---
