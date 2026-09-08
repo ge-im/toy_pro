@@ -6,6 +6,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
 import com.example.demo.auth.security.filter.JwtAuthenticationFilter;
@@ -20,7 +22,13 @@ public class SecurityConfig {
 	
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 	private final SecurityErrorResponseWriter securityErrorResponseWriter;
-	 
+	
+	// password 인코딩 객체
+	@Bean
+	PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+	
 	@Bean
 	SecurityWebFilterChain springSecurityWebFilterChain(ServerHttpSecurity http) throws Exception {
 		/* 공식 문서 예시
@@ -49,6 +57,7 @@ public class SecurityConfig {
 		        .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable) //security 기본 인증 비활성
 		        .authorizeExchange(auth -> auth
 		        		.pathMatchers("/auth/login", "/auth/reissue").permitAll()
+					.pathMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 		        		.pathMatchers("/error").permitAll()
 		                .pathMatchers(HttpMethod.GET, "/**").hasAnyRole("ADMIN", "USER")
 		                .pathMatchers(HttpMethod.POST, "/**").hasAnyRole("ADMIN", "USER")
