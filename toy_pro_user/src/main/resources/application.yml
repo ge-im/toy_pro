@@ -23,6 +23,10 @@ spring:
     user:
       name: user
       password: 1111
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 jwt:
   secretKey: qw12ee23t04id993jdif994jdfnn2o39s00xodjh2939dhc8b94ighfsldkfjcmn92093ifji39

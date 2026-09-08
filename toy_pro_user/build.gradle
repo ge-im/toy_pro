@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.4.3'
+	id 'org.springframework.boot' version '3.5.5'
 	id 'io.spring.dependency-management' version '1.1.7'
 	id 'eclipse'
 }
@@ -46,6 +46,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // OpenAPI / Swagger UI for Spring WebFlux
+    implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.17'
     runtimeOnly 'org.postgresql:postgresql'
     implementation 'org.postgresql:r2dbc-postgresql'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'

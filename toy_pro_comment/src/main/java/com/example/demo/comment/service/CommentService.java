@@ -6,14 +6,12 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.comment.api.dto.CommentCreateRequestDTO;
 import com.example.demo.comment.api.dto.CommentResponseDTO;
-import com.example.demo.comment.api.dto.CommentSearchRequestDTO;
 import com.example.demo.comment.api.dto.CommentUpdateRequestDTO;
 import com.example.demo.comment.domain.mapper.CommentMapper;
 import com.example.demo.comment.domain.model.Comment;
 import com.example.demo.comment.domain.repository.CommentCustomRepository;
 import com.example.demo.comment.domain.repository.CommentRepository;
 import com.example.demo.common.dto.PageableDTO;
-import com.example.demo.common.dto.SearchDTO;
 import com.example.demo.common.error.code.BusinessErrorCode;
 import com.example.demo.common.error.exception.BusinessException;
 
@@ -29,9 +27,9 @@ public class CommentService {
 	private final CommentCustomRepository customRepository;
 	private final CommentMapper mapper;
 	
-	public Flux<CommentResponseDTO> findAllByCondition(SearchDTO<CommentSearchRequestDTO> dto) {
-		return null;
-	}
+//	public Flux<CommentResponseDTO> findAllByCondition(SearchDTO<CommentSearchRequestDTO> dto) {
+//		return null;
+//	}
 	
 	public Flux<CommentResponseDTO> findAllByPostSn(long postSn, PageableDTO page) {
 		return repository.findAllByPostSn(postSn, page.getSize(), page.getOffset())
